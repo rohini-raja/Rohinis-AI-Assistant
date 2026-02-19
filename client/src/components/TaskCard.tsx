@@ -79,12 +79,12 @@ export function TaskCard({ task }: TaskCardProps) {
             <div className="flex gap-1 flex-wrap">
               <VillageBadge village={task.village} />
               {charData && (
-                <span className="text-[10px] bg-neutral-800 text-neutral-300 px-2 py-0.5 rounded border border-neutral-700 uppercase font-bold">
+                <span className="text-[10px] bg-neutral-800 text-neutral-300 px-2 py-0.5 rounded border border-neutral-700 uppercase font-bold font-shinobi">
                   {charData.name}
                 </span>
               )}
               {teamData && (
-                <span className="text-[10px] bg-neutral-800 text-neutral-300 px-2 py-0.5 rounded border border-neutral-700 uppercase font-bold">
+                <span className="text-[10px] bg-neutral-800 text-neutral-300 px-2 py-0.5 rounded border border-neutral-700 uppercase font-bold font-shinobi">
                   {teamData.name}
                 </span>
               )}

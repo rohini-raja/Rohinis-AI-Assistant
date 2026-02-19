@@ -101,14 +101,17 @@ export function useUpdateTask() {
       if (!res.ok) throw new Error("Failed to update mission status");
       return await res.json();
     },
-    onSuccess: (data) => {
+    onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: [api.tasks.list.path] });
       
       if (data.status === 'completed') {
+        const char = SHINOBI_DATA.characters.find(c => c.id === data.character);
+        const quote = char ? char.quote : getRandomQuote();
+        
         toast({
-          title: "Mission Accomplished!",
-          description: getRandomQuote(),
-          className: "bg-green-600 text-white border-2 border-black font-display tracking-wide",
+          title: `${char?.name || 'Shinobi'} says:`,
+          description: quote,
+          className: "bg-green-600 text-white border-2 border-black font-shinobi text-lg tracking-wide",
         });
       } else {
         toast({

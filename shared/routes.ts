@@ -1,4 +1,5 @@
 
+// shared/routes.ts
 import { z } from 'zod';
 import { insertTaskSchema, insertTaskUpdateSchema, tasks, taskUpdates } from './schema';
 
@@ -104,3 +105,10 @@ export function buildUrl(path: string, params?: Record<string, string | number>)
   }
   return url;
 }
+
+export type CreateTaskRequest = z.infer<typeof api.tasks.create.input>;
+export type UpdateTaskRequest = z.infer<typeof api.tasks.update.input>;
+export type CreateUpdateRequest = z.infer<typeof api.tasks.addUpdate.input>;
+export type TaskWithUpdates = z.infer<typeof api.tasks.list.responses[200]>[number];
+export type ImportData = z.infer<typeof api.data.export.responses[200]>;
+

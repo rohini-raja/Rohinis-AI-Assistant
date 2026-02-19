@@ -39,9 +39,7 @@ export function NinjaCard({ children, className, variant = "default", village = 
 
   // Default Card (Kunai-style sharp edges)
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
+    <div 
       className={cn(
         "bg-card text-card-foreground border-l-4 shadow-lg p-6 relative overflow-hidden transition-all duration-300",
         "before:content-[''] before:absolute before:top-0 before:right-0 before:w-0 before:h-0 before:border-t-[20px] before:border-r-[20px] before:border-t-primary before:border-r-transparent",
@@ -61,6 +59,6 @@ export function NinjaCard({ children, className, variant = "default", village = 
         </div>
       )}
       {children}
-    </motion.div>
+    </div>
   );
 }

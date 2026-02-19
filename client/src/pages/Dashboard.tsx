@@ -4,7 +4,7 @@ import { TaskCard } from "@/components/TaskCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, Download, Upload, Flame } from "lucide-react";
+import { Search, Download, Upload, Flame, ScrollText } from "lucide-react";
 import { useState } from "react";
 import { motion } from "framer-motion";
 
@@ -120,7 +120,7 @@ export default function Dashboard() {
             
             <div className="flex items-center gap-4">
                <div className="bg-neutral-800 px-4 py-2 rounded border border-neutral-700">
-                  <span className="text-xs text-neutral-400 uppercase font-bold mr-2">Active Missions:</span>
+                  <span className="text-xs text-neutral-400 uppercase font-bold mr-2 font-shinobi">Active Missions:</span>
                   <span className="text-xl font-display text-primary">{activeCount}</span>
                </div>
                <CreateTaskDialog />
@@ -160,7 +160,7 @@ export default function Dashboard() {
         ) : (
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <div className="w-24 h-24 rounded-full bg-neutral-900 border-4 border-neutral-800 flex items-center justify-center mb-6">
-              <Scroll className="h-10 w-10 text-neutral-600" />
+              <ScrollText className="h-10 w-10 text-neutral-600" />
             </div>
             <h3 className="text-2xl font-display text-neutral-500 mb-2">No Missions Found</h3>
             <p className="text-neutral-400 max-w-md">
