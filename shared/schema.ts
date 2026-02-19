@@ -9,7 +9,9 @@ export const tasks = pgTable("tasks", {
   description: text("description"),
   status: text("status", { enum: ["pending", "completed"] }).default("pending").notNull(),
   priority: text("priority", { enum: ["genin", "chunin", "jonin", "kage"] }).default("genin").notNull(),
-  village: text("village").default("leaf").notNull(), // aesthetic tag
+  village: text("village").default("leaf").notNull(), 
+  character: text("character").default("naruto").notNull(), // New field for character theme
+  team: text("team").default("team7").notNull(), // New field for team theme
   createdAt: timestamp("created_at").defaultNow(),
   completedAt: timestamp("completed_at"),
 });

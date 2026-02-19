@@ -1,4 +1,4 @@
-import { useCreateTask } from "@/hooks/use-tasks";
+import { useCreateTask, SHINOBI_DATA } from "@/hooks/use-tasks";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertTaskSchema, type InsertTask } from "@shared/schema";
@@ -36,6 +36,8 @@ export function CreateTaskDialog() {
       description: "",
       priority: "genin",
       village: "leaf",
+      character: "naruto",
+      team: "team7",
       status: "pending"
     },
   });
@@ -57,7 +59,7 @@ export function CreateTaskDialog() {
           Assign New Mission
         </Button>
       </DialogTrigger>
-      <DialogContent className="bg-neutral-900 border-2 border-primary/50 text-foreground sm:max-w-[500px]">
+      <DialogContent className="bg-neutral-900 border-2 border-primary/50 text-foreground sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-3xl font-display text-primary flex items-center gap-2">
             <Zap className="h-6 w-6" />
@@ -93,7 +95,7 @@ export function CreateTaskDialog() {
                   <FormControl>
                     <Textarea 
                       placeholder="Mission objectives and intelligence..." 
-                      className="bg-neutral-950 border-neutral-800 focus:border-primary min-h-[100px]" 
+                      className="bg-neutral-950 border-neutral-800 focus:border-primary min-h-[80px]" 
                       {...field} 
                       value={field.value || ''}
                     />
@@ -109,7 +111,7 @@ export function CreateTaskDialog() {
                 name="priority"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-primary font-bold">Rank (Difficulty)</FormLabel>
+                    <FormLabel className="text-primary font-bold">Rank</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger className="bg-neutral-950 border-neutral-800">
@@ -141,11 +143,57 @@ export function CreateTaskDialog() {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent className="bg-neutral-900 border-neutral-800 text-foreground">
-                        <SelectItem value="leaf">Hidden Leaf</SelectItem>
-                        <SelectItem value="sand">Hidden Sand</SelectItem>
-                        <SelectItem value="mist">Hidden Mist</SelectItem>
-                        <SelectItem value="cloud">Hidden Cloud</SelectItem>
-                        <SelectItem value="rock">Hidden Rock</SelectItem>
+                        {SHINOBI_DATA.villages.map(v => (
+                          <SelectItem key={v.id} value={v.id}>{v.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="character"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-primary font-bold">Shinobi Lead</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger className="bg-neutral-950 border-neutral-800">
+                          <SelectValue placeholder="Select character" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent className="bg-neutral-900 border-neutral-800 text-foreground">
+                        {SHINOBI_DATA.characters.map(c => (
+                          <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="team"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-primary font-bold">Squad</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger className="bg-neutral-950 border-neutral-800">
+                          <SelectValue placeholder="Select team" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent className="bg-neutral-900 border-neutral-800 text-foreground">
+                        {SHINOBI_DATA.teams.map(t => (
+                          <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                     <FormMessage />

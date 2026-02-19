@@ -88,6 +88,7 @@ export default {
         mono: ["var(--font-mono)"],
         display: ["var(--font-display)"],
         body: ["var(--font-body)"],
+        shinobi: ["var(--font-shinobi)"],
       },
       keyframes: {
         "accordion-down": {

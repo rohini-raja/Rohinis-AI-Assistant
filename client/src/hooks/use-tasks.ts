@@ -2,13 +2,35 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api, buildUrl, type CreateTaskRequest, type UpdateTaskRequest, type CreateUpdateRequest, type TaskWithUpdates, type ImportData } from "@shared/routes";
 import { useToast } from "@/hooks/use-toast";
 
-const NARUTO_QUOTES = [
-  "I'm not gonna run away, I never go back on my word! That's my nindo: my ninja way!",
-  "If you don't like your destiny, don't accept it. Instead, have the courage to change it the way you want it to be!",
-  "Hard work is worthless for those that don't believe in themselves.",
-  "A dropout will beat a genius through hard work!",
-  "When people are protecting something truly special to them, they truly can become as strong as they can be.",
-];
+export const SHINOBI_DATA = {
+  characters: [
+    { id: "naruto", name: "Naruto Uzumaki", village: "leaf", team: "team7", quote: "I'm not gonna run away, I never go back on my word! That's my nindo: my ninja way!" },
+    { id: "sasuke", name: "Sasuke Uchiha", village: "leaf", team: "team7", quote: "I have long since closed my eyes... My only goal is in the darkness." },
+    { id: "sakura", name: "Sakura Haruno", village: "leaf", team: "team7", quote: "The things that are most important aren't written in books. You have to learn them by experiencing them yourself." },
+    { id: "kakashi", name: "Kakashi Hatake", village: "leaf", team: "team7", quote: "In the ninja world, those who break the rules are scum, that's true, but those who abandon their friends are worse than scum." },
+    { id: "itachi", name: "Itachi Uchiha", village: "leaf", team: "akatsuki", quote: "It is not that if you become Hokage, everyone will acknowledge you. It is the one who is acknowledged by everyone that becomes Hokage." },
+    { id: "pain", name: "Pain", village: "rain", team: "akatsuki", quote: "Justice comes from vengeance, but that justice only breeds more vengeance." },
+    { id: "gaara", name: "Gaara", village: "sand", team: "sand_siblings", quote: "Perhaps the companionship of an evil person is preferable to loneliness." },
+    { id: "madara", name: "Madara Uchiha", village: "leaf", team: "legendary", quote: "Wake up to reality! Nothing ever goes as planned in this world." },
+    { id: "jiraiya", name: "Jiraiya", village: "leaf", team: "sannin", quote: "A person's life is not measured by what they do but by what they've done for others." },
+    { id: "tsunade", name: "Tsunade", village: "leaf", team: "sannin", quote: "People become stronger because they have memories they can't forget." },
+  ],
+  teams: [
+    { id: "team7", name: "Team 7", color: "orange" },
+    { id: "akatsuki", name: "Akatsuki", color: "red" },
+    { id: "sand_siblings", name: "Sand Siblings", color: "yellow" },
+    { id: "sannin", name: "Legendary Sannin", color: "green" },
+  ],
+  villages: [
+    { id: "leaf", name: "Hidden Leaf", color: "24 95% 53%" },
+    { id: "sand", name: "Hidden Sand", color: "40 80% 60%" },
+    { id: "mist", name: "Hidden Mist", color: "200 80% 60%" },
+    { id: "cloud", name: "Hidden Cloud", color: "260 70% 70%" },
+    { id: "rock", name: "Hidden Rock", color: "15 50% 40%" },
+  ]
+};
+
+const NARUTO_QUOTES = SHINOBI_DATA.characters.map(c => c.quote);
 
 function getRandomQuote() {
   return NARUTO_QUOTES[Math.floor(Math.random() * NARUTO_QUOTES.length)];

@@ -6,7 +6,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Input } from "@/components/ui/input";
 import { format } from "date-fns";
 import { Check, Trash2, ShieldAlert, Shield, ShieldCheck, Crown, Scroll, Send } from "lucide-react";
-import { useUpdateTask, useDeleteTask, useAddTaskUpdate } from "@/hooks/use-tasks";
+import { useUpdateTask, useDeleteTask, useAddTaskUpdate, SHINOBI_DATA } from "@/hooks/use-tasks";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -46,6 +46,9 @@ export function TaskCard({ task }: TaskCardProps) {
   const addUpdate = useAddTaskUpdate();
   const [updateText, setUpdateText] = useState("");
 
+  const charData = SHINOBI_DATA.characters.find(c => c.id === task.character);
+  const teamData = SHINOBI_DATA.teams.find(t => t.id === task.team);
+
   const handleToggleStatus = () => {
     const newStatus = task.status === 'pending' ? 'completed' : 'pending';
     const completedAt = newStatus === 'completed' ? new Date().toISOString() : null;
@@ -62,14 +65,30 @@ export function TaskCard({ task }: TaskCardProps) {
   };
 
   return (
-    <NinjaCard className={`transition-all duration-300 ${task.status === 'completed' ? 'opacity-70 grayscale-[0.5]' : ''}`}>
+    <NinjaCard 
+      village={task.village} 
+      character={task.character}
+      className={`transition-all duration-300 ${task.status === 'completed' ? 'opacity-70 grayscale-[0.5]' : ''}`}
+    >
       <div className="flex justify-between items-start mb-4">
         <div className="space-y-1">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <h3 className={`text-xl font-bold font-display tracking-wide ${task.status === 'completed' ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
               {task.title}
             </h3>
-            <VillageBadge village={task.village} />
+            <div className="flex gap-1 flex-wrap">
+              <VillageBadge village={task.village} />
+              {charData && (
+                <span className="text-[10px] bg-neutral-800 text-neutral-300 px-2 py-0.5 rounded border border-neutral-700 uppercase font-bold">
+                  {charData.name}
+                </span>
+              )}
+              {teamData && (
+                <span className="text-[10px] bg-neutral-800 text-neutral-300 px-2 py-0.5 rounded border border-neutral-700 uppercase font-bold">
+                  {teamData.name}
+                </span>
+              )}
+            </div>
           </div>
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <PriorityIcon priority={task.priority} />

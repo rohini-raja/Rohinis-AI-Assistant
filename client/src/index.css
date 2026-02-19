@@ -51,6 +51,7 @@
 
   --font-display: 'Bangers', cursive;
   --font-body: 'Kosugi Maru', sans-serif;
+  --font-shinobi: 'Architects Daughter', cursive;
 }
 
 @layer base {
@@ -64,6 +65,10 @@
 
   h1, h2, h3, h4, h5, h6 {
     @apply font-display tracking-wide;
+  }
+
+  .font-shinobi {
+    font-family: var(--font-shinobi);
   }
 }
 

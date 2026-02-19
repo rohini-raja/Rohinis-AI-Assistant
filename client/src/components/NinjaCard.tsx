@@ -1,12 +1,18 @@
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
+import { SHINOBI_DATA } from "@/hooks/use-tasks";
 
 interface NinjaCardProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
   variant?: "default" | "scroll" | "plate";
+  village?: string;
+  character?: string;
 }
 
-export function NinjaCard({ children, className, variant = "default", ...props }: NinjaCardProps) {
+export function NinjaCard({ children, className, variant = "default", village = "leaf", character, ...props }: NinjaCardProps) {
+  const villageData = SHINOBI_DATA.villages.find(v => v.id === village) || SHINOBI_DATA.villages[0];
+  const charData = SHINOBI_DATA.characters.find(c => c.id === character);
+
   if (variant === "scroll") {
     return (
       <div className={cn("relative my-4 group", className)} {...props}>
@@ -16,7 +22,10 @@ export function NinjaCard({ children, className, variant = "default", ...props }
         </div>
         
         {/* Scroll Content Body */}
-        <div className="bg-[#fdfbf7] mx-2 border-x-2 border-neutral-800 p-6 min-h-[100px] ninja-scroll-bg shadow-inner relative">
+        <div 
+          className="bg-[#fdfbf7] mx-2 border-x-2 border-neutral-800 p-6 min-h-[100px] ninja-scroll-bg shadow-inner relative"
+          style={{ borderLeftColor: `hsl(${villageData.color})`, borderRightColor: `hsl(${villageData.color})` }}
+        >
           {children}
         </div>
 
@@ -28,32 +37,29 @@ export function NinjaCard({ children, className, variant = "default", ...props }
     );
   }
 
-  if (variant === "plate") {
-    return (
-      <div className={cn(
-        "bg-neutral-800 border-4 border-neutral-600 rounded-sm p-1 shadow-lg",
-        className
-      )} {...props}>
-        <div className="bg-neutral-900 border border-neutral-700 p-4 h-full relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-bl from-white/5 to-transparent pointer-events-none" />
-          {children}
-        </div>
-      </div>
-    );
-  }
-
   // Default Card (Kunai-style sharp edges)
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       className={cn(
-        "bg-card text-card-foreground border-l-4 border-primary shadow-lg p-6 relative overflow-hidden",
+        "bg-card text-card-foreground border-l-4 shadow-lg p-6 relative overflow-hidden transition-all duration-300",
         "before:content-[''] before:absolute before:top-0 before:right-0 before:w-0 before:h-0 before:border-t-[20px] before:border-r-[20px] before:border-t-primary before:border-r-transparent",
         className
       )} 
+      style={{ borderLeftColor: `hsl(${villageData.color})` }}
       {...props}
     >
+      {/* Character Watermark */}
+      {character && (
+        <div className="absolute -bottom-6 -right-6 w-32 h-32 opacity-[0.05] pointer-events-none group-hover:opacity-[0.1] transition-opacity duration-500">
+           <img 
+            src={`https://api.dicebear.com/7.x/bottts-neutral/svg?seed=${character}&backgroundColor=transparent`} 
+            alt={character}
+            className="w-full h-full grayscale invert"
+          />
+        </div>
+      )}
       {children}
     </motion.div>
   );
