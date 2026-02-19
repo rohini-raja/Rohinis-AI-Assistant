@@ -1,18 +1,28 @@
-import { useTasks, exportData, useImportData } from "@/hooks/use-tasks";
+import { useTasks, exportData, useImportData, SHINOBI_DATA } from "@/hooks/use-tasks";
 import { CreateTaskDialog } from "@/components/CreateTaskDialog";
 import { TaskCard } from "@/components/TaskCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, Download, Upload, Flame, ScrollText } from "lucide-react";
-import { useState } from "react";
-import { motion } from "framer-motion";
+import { Search, Download, Upload, Flame, ScrollText, Quote } from "lucide-react";
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function Dashboard() {
   const { data: tasks, isLoading, error } = useTasks();
   const importData = useImportData();
   const [search, setSearch] = useState("");
   const [activeTab, setActiveTab] = useState("active");
+  const [quoteIndex, setQuoteIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setQuoteIndex((prev) => (prev + 1) % SHINOBI_DATA.quotes.length);
+    }, 10000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const currentQuote = SHINOBI_DATA.quotes[quoteIndex];
 
   const handleExport = async () => {
     try {
@@ -87,6 +97,23 @@ export default function Dashboard() {
                   Village Mission Control
                 </p>
               </div>
+            </div>
+
+            {/* Dynamic Quote Section */}
+            <div className="flex-1 max-w-xl hidden lg:block px-8">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={quoteIndex}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="bg-neutral-800/40 backdrop-blur-sm p-4 rounded-lg border-l-4 border-primary italic relative"
+                >
+                  <Quote className="absolute -top-2 -left-2 h-6 w-6 text-primary/40 rotate-180" />
+                  <p className="text-sm text-neutral-200 mb-1 font-shinobi">"{currentQuote.text}"</p>
+                  <p className="text-xs text-primary font-bold text-right">— {currentQuote.author}</p>
+                </motion.div>
+              </AnimatePresence>
             </div>
 
             <div className="flex items-center gap-3">

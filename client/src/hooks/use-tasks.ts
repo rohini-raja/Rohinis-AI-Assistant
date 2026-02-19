@@ -15,6 +15,18 @@ export const SHINOBI_DATA = {
     { id: "jiraiya", name: "Jiraiya", village: "leaf", team: "sannin", quote: "A person's life is not measured by what they do but by what they've done for others." },
     { id: "tsunade", name: "Tsunade", village: "leaf", team: "sannin", quote: "People become stronger because they have memories they can't forget." },
   ],
+  quotes: [
+    { text: "I'm not gonna run away, I never go back on my word! That's my nindo: my ninja way!", author: "Naruto Uzumaki" },
+    { text: "If you don't like your destiny, don't accept it. Instead, have the courage to change it the way you want it to be!", author: "Naruto Uzumaki" },
+    { text: "In the ninja world, those who break the rules are scum, that's true, but those who abandon their friends are worse than scum.", author: "Kakashi Hatake" },
+    { text: "Hard work is worthless for those that don't believe in themselves.", author: "Naruto Uzumaki" },
+    { text: "It is not that if you become Hokage, everyone will acknowledge you. It is the one who is acknowledged by everyone that becomes Hokage.", author: "Itachi Uchiha" },
+    { text: "The things that are most important aren't written in books. You have to learn them by experiencing them yourself.", author: "Sakura Haruno" },
+    { text: "Wake up to reality! Nothing ever goes as planned in this world.", author: "Madara Uchiha" },
+    { text: "A person's life is not measured by what they do but by what they've done for others.", author: "Jiraiya" },
+    { text: "Those who do not understand true pain can never understand true peace.", author: "Pain" },
+    { text: "Fear. That is what we live with. And we live it every day. Only in death are we free of it.", author: "Neji Hyuga" },
+  ],
   teams: [
     { id: "team7", name: "Team 7", color: "orange" },
     { id: "akatsuki", name: "Akatsuki", color: "red" },

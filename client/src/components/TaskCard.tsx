@@ -68,9 +68,22 @@ export function TaskCard({ task }: TaskCardProps) {
     <NinjaCard 
       village={task.village} 
       character={task.character}
-      className={`transition-all duration-300 ${task.status === 'completed' ? 'opacity-70 grayscale-[0.5]' : ''}`}
+      className={`transition-all duration-300 relative group/card ${task.status === 'completed' ? 'opacity-70 grayscale-[0.5]' : ''}`}
     >
-      <div className="flex justify-between items-start mb-4">
+      {/* Character Image Overlay */}
+      <motion.div 
+        className="absolute top-0 right-0 w-32 h-32 pointer-events-none opacity-20 group-hover/card:opacity-40 transition-opacity"
+        whileHover={{ scale: 1.1, rotate: 5 }}
+      >
+        <img 
+          src={`/images/characters/${task.character}.png`} 
+          alt={task.character}
+          className="w-full h-full object-contain"
+          onError={(e) => (e.currentTarget.style.display = 'none')}
+        />
+      </motion.div>
+
+      <div className="flex justify-between items-start mb-4 relative z-10">
         <div className="space-y-1">
           <div className="flex items-center gap-2 flex-wrap">
             <h3 className={`text-xl font-bold font-display tracking-wide ${task.status === 'completed' ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
