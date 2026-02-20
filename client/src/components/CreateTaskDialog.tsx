@@ -38,6 +38,7 @@ export function CreateTaskDialog() {
       village: "leaf",
       character: "naruto",
       team: "team7",
+      happiness: 50,
       status: "pending"
     },
   });
@@ -99,6 +100,34 @@ export function CreateTaskDialog() {
                       {...field} 
                       value={field.value || ''}
                     />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="happiness"
+              render={({ field }) => (
+                <FormItem>
+                  <div className="flex justify-between items-center mb-1">
+                    <FormLabel className="text-primary font-bold">Initial Moral (Happiness)</FormLabel>
+                    <span className="text-xs font-mono text-neutral-400">{field.value}%</span>
+                  </div>
+                  <FormControl>
+                    <div className="flex items-center gap-4">
+                      <span className="text-lg">😞</span>
+                      <input 
+                        type="range" 
+                        min="0" 
+                        max="100" 
+                        className="flex-1 accent-primary h-2 bg-neutral-800 rounded-lg appearance-none cursor-pointer"
+                        value={field.value}
+                        onChange={(e) => field.onChange(parseInt(e.target.value))}
+                      />
+                      <span className="text-lg">🔥</span>
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>

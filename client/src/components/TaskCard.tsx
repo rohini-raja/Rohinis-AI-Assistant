@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Input } from "@/components/ui/input";
 import { format } from "date-fns";
-import { Check, Trash2, ShieldAlert, Shield, ShieldCheck, Crown, Scroll, Send } from "lucide-react";
+import { Check, Trash2, ShieldAlert, Shield, ShieldCheck, Crown, Scroll, Send, Heart, HeartOff } from "lucide-react";
 import { useUpdateTask, useDeleteTask, useAddTaskUpdate, SHINOBI_DATA } from "@/hooks/use-tasks";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -64,6 +64,17 @@ export function TaskCard({ task }: TaskCardProps) {
     setUpdateText("");
   };
 
+  const handleHappinessChange = (val: number) => {
+    updateTask.mutate({ id: task.id, happiness: val });
+  };
+
+  const getHappinessIcon = (val: number) => {
+    if (val >= 80) return "🔥";
+    if (val >= 50) return "😊";
+    if (val >= 20) return "😐";
+    return "😞";
+  };
+
   return (
     <NinjaCard 
       village={task.village} 
@@ -103,15 +114,20 @@ export function TaskCard({ task }: TaskCardProps) {
               )}
             </div>
           </div>
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <PriorityIcon priority={task.priority} />
-            <span className="capitalize font-semibold">{task.priority} Rank</span>
-            <span>•</span>
-            <span>{format(new Date(task.createdAt || new Date()), "MMM d, yyyy")}</span>
+          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+            <div className="flex items-center gap-1">
+              <PriorityIcon priority={task.priority} />
+              <span className="capitalize font-semibold">{task.priority} Rank</span>
+            </div>
+            <div className="flex items-center gap-1 group/happiness cursor-pointer">
+              <span className="text-xs font-bold text-primary/80">{getHappinessIcon(task.happiness || 50)}</span>
+              <span className="font-mono text-[10px]">{task.happiness || 50}% Moral</span>
+            </div>
+            <span>{format(new Date(task.createdAt || new Date()), "MMM d")}</span>
           </div>
         </div>
         
-        <div className="flex gap-2">
+        <div className="flex gap-2 relative z-20">
           <Button
             size="icon"
             variant={task.status === 'completed' ? "default" : "outline"}
@@ -133,9 +149,25 @@ export function TaskCard({ task }: TaskCardProps) {
         </div>
       </div>
 
-      <p className="text-neutral-300 mb-6 leading-relaxed">
+      <p className="text-neutral-300 mb-4 leading-relaxed">
         {task.description || "No mission details provided."}
       </p>
+
+      {/* Happiness Adjustment Slider */}
+      <div className="mb-4 px-1">
+        <div className="flex justify-between items-center mb-1">
+          <span className="text-[10px] uppercase font-bold text-neutral-500 tracking-tighter font-shinobi">Squad Morale</span>
+          <span className="text-[10px] font-mono text-primary">{task.happiness || 50}%</span>
+        </div>
+        <input 
+          type="range" 
+          min="0" 
+          max="100" 
+          className="w-full h-1 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-primary"
+          value={task.happiness || 50}
+          onChange={(e) => handleHappinessChange(parseInt(e.target.value))}
+        />
+      </div>
 
       <div className="bg-neutral-900/50 rounded-lg border border-neutral-800 overflow-hidden">
         <Accordion type="single" collapsible className="w-full">
