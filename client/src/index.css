@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Bangers&family=Kosugi+Maru&family=Roboto:ital,wght@0,400;0,500;0,700;0,900;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bangers&family=Kosugi+Maru&family=Roboto:ital,wght@0,400;0,500;0,700;0,900;1,400&family=Architects+Daughter&family=Inter:wght@400;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,21 +6,15 @@
 
 :root {
   /* Naruto Theme Colors */
-  /* Orange - Naruto's Jumpsuit */
   --naruto-orange: 24 95% 53%;
-  /* Black - Ninja Gear */
   --ninja-black: 220 13% 18%;
-  /* Blue - Chakra / Rasengan */
   --chakra-blue: 199 89% 68%;
-  /* Green - Konoha Flak Jacket */
   --konoha-green: 142 45% 45%;
-  /* Red - Sharingan/Kyubi */
   --sharingan-red: 355 85% 55%;
-  /* Scroll Paper Off-White */
   --scroll-paper: 40 50% 96%;
 
-  --background: 220 13% 10%; /* Dark background */
-  --foreground: 40 50% 96%;  /* Light text */
+  --background: 220 13% 10%;
+  --foreground: 40 50% 96%;
 
   --card: 220 13% 14%;
   --card-foreground: 40 50% 96%;
@@ -28,7 +22,7 @@
   --popover: 220 13% 14%;
   --popover-foreground: 40 50% 96%;
 
-  --primary: 24 95% 53%; /* Orange */
+  --primary: 24 95% 53%;
   --primary-foreground: 220 13% 10%;
 
   --secondary: 220 13% 25%;
@@ -37,7 +31,7 @@
   --muted: 220 13% 25%;
   --muted-foreground: 215 20% 65%;
 
-  --accent: 199 89% 68%; /* Chakra Blue */
+  --accent: 199 89% 68%;
   --accent-foreground: 220 13% 10%;
 
   --destructive: 355 85% 55%;
@@ -52,6 +46,28 @@
   --font-display: 'Bangers', cursive;
   --font-body: 'Kosugi Maru', sans-serif;
   --font-shinobi: 'Architects Daughter', cursive;
+  --font-modern: 'Inter', sans-serif;
+}
+
+.light {
+  --background: 40 50% 96%;
+  --foreground: 220 13% 10%;
+  --card: 40 50% 90%;
+  --card-foreground: 220 13% 10%;
+  --popover: 40 50% 90%;
+  --popover-foreground: 220 13% 10%;
+  --primary: 24 95% 53%;
+  --primary-foreground: 40 50% 96%;
+  --secondary: 40 50% 85%;
+  --secondary-foreground: 220 13% 10%;
+  --muted: 40 50% 85%;
+  --muted-foreground: 220 13% 40%;
+  --accent: 199 89% 68%;
+  --accent-foreground: 220 13% 10%;
+  --border: 40 50% 80%;
+  --input: 40 50% 80%;
+  --ring: 24 95% 53%;
+  --scroll-paper: 40 50% 96%;
 }
 
 @layer base {

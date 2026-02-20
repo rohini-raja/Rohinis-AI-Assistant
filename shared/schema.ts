@@ -10,9 +10,9 @@ export const tasks = pgTable("tasks", {
   status: text("status", { enum: ["pending", "completed"] }).default("pending").notNull(),
   priority: text("priority", { enum: ["genin", "chunin", "jonin", "kage"] }).default("genin").notNull(),
   village: text("village").default("leaf").notNull(), 
-  character: text("character").default("naruto").notNull(), // New field for character theme
-  team: text("team").default("team7").notNull(), // New field for team theme
-  happiness: integer("happiness").default(50).notNull(), // Happiness metric (0-100)
+  character: text("character").default("naruto").notNull(),
+  team: text("team").default("team7").notNull(),
+  happiness: integer("happiness").default(50).notNull(),
   createdAt: timestamp("created_at").defaultNow(),
   completedAt: timestamp("completed_at"),
 });
@@ -24,23 +24,28 @@ export const taskUpdates = pgTable("task_updates", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-// Schemas
+export const quickNotes = pgTable("quick_notes", {
+  id: serial("id").primaryKey(),
+  content: text("content").notNull(),
+  completed: boolean("completed").default(false).notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const insertTaskSchema = createInsertSchema(tasks).omit({ id: true, createdAt: true, completedAt: true });
 export const insertTaskUpdateSchema = createInsertSchema(taskUpdates).omit({ id: true, createdAt: true });
+export const insertQuickNoteSchema = createInsertSchema(quickNotes).omit({ id: true, createdAt: true });
 
-// Types
 export type Task = typeof tasks.$inferSelect;
 export type InsertTask = z.infer<typeof insertTaskSchema>;
 export type TaskUpdate = typeof taskUpdates.$inferSelect;
 export type InsertTaskUpdate = z.infer<typeof insertTaskUpdateSchema>;
+export type QuickNote = typeof quickNotes.$inferSelect;
+export type InsertQuickNote = z.infer<typeof insertQuickNoteSchema>;
 
-// API Contract Types
 export type CreateTaskRequest = InsertTask;
 export type UpdateTaskRequest = Partial<InsertTask>;
 export type CreateUpdateRequest = InsertTaskUpdate;
-
 export type TaskWithUpdates = Task & { updates: TaskUpdate[] };
-
 export type ImportData = {
   tasks: Task[];
   updates: TaskUpdate[];

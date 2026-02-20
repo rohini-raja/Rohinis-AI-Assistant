@@ -1,6 +1,6 @@
 
 import { db } from "./db";
-import { tasks, taskUpdates, type Task, type InsertTask, type TaskUpdate, type InsertTaskUpdate } from "@shared/schema";
+import { tasks, taskUpdates, quickNotes, type Task, type InsertTask, type TaskUpdate, type InsertTaskUpdate, type QuickNote, type InsertQuickNote } from "@shared/schema";
 import { eq, desc } from "drizzle-orm";
 
 export interface IStorage {
@@ -14,6 +14,12 @@ export interface IStorage {
   // Updates
   createTaskUpdate(update: InsertTaskUpdate): Promise<TaskUpdate>;
   getTaskUpdates(taskId: number): Promise<TaskUpdate[]>;
+
+  // Quick Notes
+  getQuickNotes(): Promise<QuickNote[]>;
+  createQuickNote(note: InsertQuickNote): Promise<QuickNote>;
+  updateQuickNote(id: number, completed: boolean): Promise<QuickNote | undefined>;
+  deleteQuickNote(id: number): Promise<void>;
 
   // Import/Export
   importData(data: { tasks: Task[], updates: TaskUpdate[] }): Promise<void>;
@@ -61,9 +67,25 @@ export class DatabaseStorage implements IStorage {
     return db.select().from(taskUpdates).where(eq(taskUpdates.taskId, taskId)).orderBy(desc(taskUpdates.createdAt));
   }
 
+  async getQuickNotes(): Promise<QuickNote[]> {
+    return db.select().from(quickNotes).orderBy(desc(quickNotes.createdAt));
+  }
+
+  async createQuickNote(note: InsertQuickNote): Promise<QuickNote> {
+    const [newNote] = await db.insert(quickNotes).values(note).returning();
+    return newNote;
+  }
+
+  async updateQuickNote(id: number, completed: boolean): Promise<QuickNote | undefined> {
+    const [updatedNote] = await db.update(quickNotes).set({ completed }).where(eq(quickNotes.id, id)).returning();
+    return updatedNote;
+  }
+
+  async deleteQuickNote(id: number): Promise<void> {
+    await db.delete(quickNotes).where(eq(quickNotes.id, id));
+  }
+
   async importData(data: { tasks: Task[], updates: TaskUpdate[] }): Promise<void> {
-    // Basic import logic: clear existing and insert new
-    // In a real app, maybe merge or check for conflicts. Here we overwrite for simplicity as requested "import the same".
     await db.delete(taskUpdates);
     await db.delete(tasks);
 

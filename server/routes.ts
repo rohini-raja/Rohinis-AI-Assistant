@@ -92,13 +92,6 @@ export async function registerRoutes(
   // Export Data
   app.get(api.data.export.path, async (_req, res) => {
     const tasks = await storage.getTasks();
-    // Flatten updates for export if needed, but getTasks already returns structured data.
-    // However, storage.importData expects { tasks, updates } as raw arrays.
-    // Let's refactor getTasks to return structured, but we can also get raw arrays here.
-    // Actually, let's just use the arrays from storage for export to be safe and simple.
-    // But storage.getTasks returns nested updates.
-    // Let's modify storage to expose raw export if needed, or just map it back.
-    // Mapping back is easy.
     const flatTasks = tasks.map(({ updates, ...t }) => t);
     const flatUpdates = tasks.flatMap(t => t.updates);
 
@@ -112,7 +105,6 @@ export async function registerRoutes(
   app.post(api.data.import.path, async (req, res) => {
     try {
       const data = req.body;
-      // Basic validation that we have arrays
       if (!Array.isArray(data.tasks) || !Array.isArray(data.updates)) {
         return res.status(400).json({ message: "Invalid data format" });
       }
@@ -123,10 +115,30 @@ export async function registerRoutes(
     }
   });
 
+  // Quick Notes API
+  app.get("/api/notes", async (_req, res) => {
+    const notes = await storage.getQuickNotes();
+    res.json(notes);
+  });
+
+  app.post("/api/notes", async (req, res) => {
+    const note = await storage.createQuickNote(req.body);
+    res.status(201).json(note);
+  });
+
+  app.patch("/api/notes/:id", async (req, res) => {
+    const note = await storage.updateQuickNote(Number(req.params.id), req.body.completed);
+    res.json(note);
+  });
+
+  app.delete("/api/notes/:id", async (req, res) => {
+    await storage.deleteQuickNote(Number(req.params.id));
+    res.status(204).end();
+  });
+
   return httpServer;
 }
 
-// Seed function
 async function seedDatabase() {
   const tasks = await storage.getTasks();
   if (tasks.length === 0) {
@@ -135,7 +147,10 @@ async function seedDatabase() {
       description: "Practice chakra control and rotation. Ask Jiraiya-sensei for tips.",
       status: "pending",
       priority: "jonin",
-      village: "leaf"
+      village: "leaf",
+      character: "naruto",
+      team: "team7",
+      happiness: 60
     });
     await storage.createTaskUpdate({
       taskId: task1.id,
@@ -147,7 +162,10 @@ async function seedDatabase() {
       description: "Urgent mission from Lady Tsunade. Watch out for rogue ninjas.",
       status: "pending",
       priority: "chunin",
-      village: "sand"
+      village: "sand",
+      character: "sakura",
+      team: "team7",
+      happiness: 80
     });
 
     await storage.createTask({
@@ -155,10 +173,12 @@ async function seedDatabase() {
       description: "Get the Miso Chashu Pork special with extra naruto.",
       status: "completed",
       priority: "genin",
-      village: "leaf"
+      village: "leaf",
+      character: "naruto",
+      team: "team7",
+      happiness: 100
     });
   }
 }
 
-// Call seed in the background
 seedDatabase().catch(console.error);
