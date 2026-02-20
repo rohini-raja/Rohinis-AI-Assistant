@@ -12,6 +12,7 @@ export const tasks = pgTable("tasks", {
   village: text("village").default("leaf").notNull(), 
   character: text("character").default("naruto").notNull(), // New field for character theme
   team: text("team").default("team7").notNull(), // New field for team theme
+  happiness: integer("happiness").default(50).notNull(), // Happiness metric (0-100)
   createdAt: timestamp("created_at").defaultNow(),
   completedAt: timestamp("completed_at"),
 });
