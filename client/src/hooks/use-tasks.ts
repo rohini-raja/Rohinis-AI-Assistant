@@ -27,6 +27,24 @@ export const SHINOBI_DATA = {
     { text: "Those who do not understand true pain can never understand true peace.", author: "Pain" },
     { text: "Fear. That is what we live with. And we live it every day. Only in death are we free of it.", author: "Neji Hyuga" },
   ],
+  dialogues: {
+    overwhelmed: [
+      { text: "So many missions... even for a shadow clone it's a lot! Focus, shinobi!", author: "Naruto Uzumaki" },
+      { text: "The village relies on us. We must prioritize the high-rank missions first.", author: "Kakashi Hatake" },
+    ],
+    productive: [
+      { text: "Your progress is impressive. The Will of Fire burns brightly in you!", author: "Hiruzen Sarutobi" },
+      { text: "Keep this pace up and you'll be Chunin in no time.", author: "Iruka Umino" },
+    ],
+    idle: [
+      { text: "A ninja who doesn't take missions is just a civilian with a headband. Get to work!", author: "Tsunade" },
+      { text: "The scroll remains empty. Is this your ninja way?", author: "Sasuke Uchiha" },
+    ],
+    victorious: [
+      { text: "Mission accomplished! Ichiraku Ramen is on me today!", author: "Naruto Uzumaki" },
+      { text: "Excellent work. Your coordination was perfect.", author: "Minato Namikaze" },
+    ]
+  },
   teams: [
     { id: "team7", name: "Team 7", color: "orange" },
     { id: "akatsuki", name: "Akatsuki", color: "red" },

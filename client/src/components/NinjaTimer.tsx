@@ -64,7 +64,7 @@ export function NinjaTimer() {
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-display text-primary flex items-center gap-2">
           {mode === "SAGE" ? <Flame className="h-5 w-5" /> : <Coffee className="h-5 w-5" />}
-          {mode === "SAGE" ? "SAGE MODE" : "NINJA TACTIC"}
+          {mode === "SAGE" ? "SAGE MODE" : "CHAKRA RESTORATION"}
         </h3>
         <div className="flex gap-1">
           <Button 

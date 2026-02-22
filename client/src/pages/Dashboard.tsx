@@ -17,19 +17,37 @@ export default function Dashboard() {
   const importData = useImportData();
   const [search, setSearch] = useState("");
   const [activeTab, setActiveTab] = useState("active");
-  const [quoteIndex, setQuoteIndex] = useState(0);
+  const [dialogue, setDialogue] = useState<{ text: string; author: string } | null>(null);
   const [showTools, setShowTools] = useState(false);
   const [mapVillageFilter, setMapVillageFilter] = useState<string | null>(null);
   const [showMap, setShowMap] = useState(false);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setQuoteIndex((prev) => (prev + 1) % SHINOBI_DATA.quotes.length);
-    }, 10000);
-    return () => clearInterval(interval);
-  }, []);
+    // Determine dynamic dialogue based on progress
+    if (!tasks) return;
+    const pending = tasks.filter(t => t.status === 'pending').length;
+    const completed = tasks.filter(t => t.status === 'completed').length;
+    
+    let pool = SHINOBI_DATA.quotes;
+    // @ts-ignore - dialogues is added to SHINOBI_DATA
+    if (pending > 5) pool = SHINOBI_DATA.dialogues.overwhelmed;
+    // @ts-ignore
+    else if (completed > 0 && pending === 0) pool = SHINOBI_DATA.dialogues.victorious;
+    // @ts-ignore
+    else if (completed > 3) pool = SHINOBI_DATA.dialogues.productive;
+    // @ts-ignore
+    else if (pending === 0) pool = SHINOBI_DATA.dialogues.idle;
 
-  const currentQuote = SHINOBI_DATA.quotes[quoteIndex];
+    const interval = setInterval(() => {
+      const randomIndex = Math.floor(Math.random() * pool.length);
+      setDialogue(pool[randomIndex]);
+    }, 10000);
+    
+    setDialogue(pool[Math.floor(Math.random() * pool.length)]);
+    return () => clearInterval(interval);
+  }, [tasks]);
+
+  const currentQuote = dialogue || SHINOBI_DATA.quotes[0];
 
   const handleExport = async () => {
     try {
@@ -140,7 +158,7 @@ export default function Dashboard() {
               <div className="flex-1 max-w-xl hidden lg:block px-8">
                 <AnimatePresence mode="wait">
                   <motion.div
-                    key={quoteIndex}
+                    key={currentQuote.text}
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
