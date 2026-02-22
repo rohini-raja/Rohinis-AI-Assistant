@@ -4,12 +4,13 @@ import { TaskCard } from "@/components/TaskCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, Download, Upload, Flame, ScrollText, Quote, LayoutPanelLeft } from "lucide-react";
+import { Search, Download, Upload, Flame, ScrollText, Quote, LayoutPanelLeft, Map as MapIcon, X } from "lucide-react";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { NinjaTimer } from "@/components/NinjaTimer";
 import { QuickNotes } from "@/components/QuickNotes";
 import { NinjaMelodies } from "@/components/NinjaMelodies";
+import { ShinobiMap } from "@/components/ShinobiMap";
 
 export default function Dashboard() {
   const { data: tasks, isLoading, error } = useTasks();
@@ -18,6 +19,8 @@ export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("active");
   const [quoteIndex, setQuoteIndex] = useState(0);
   const [showTools, setShowTools] = useState(false);
+  const [mapVillageFilter, setMapVillageFilter] = useState<string | null>(null);
+  const [showMap, setShowMap] = useState(false);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -67,7 +70,8 @@ export default function Dashboard() {
     const matchesTab = activeTab === "all" ? true : 
                        activeTab === "completed" ? t.status === "completed" : 
                        t.status === "pending";
-    return matchesSearch && matchesTab;
+    const matchesVillage = mapVillageFilter ? t.village === mapVillageFilter : true;
+    return matchesSearch && matchesTab && matchesVillage;
   }) || [];
 
   // Sort by created date desc
@@ -150,6 +154,14 @@ export default function Dashboard() {
               </div>
 
               <div className="flex items-center gap-3">
+                <Button 
+                  variant={showMap ? "default" : "outline"} 
+                  size="sm" 
+                  onClick={() => setShowMap(!showMap)}
+                  className={`border-neutral-700 bg-neutral-800/50 hover:bg-neutral-800 ${showMap ? 'bg-primary text-primary-foreground' : 'text-neutral-300'}`}
+                >
+                  <MapIcon className="mr-2 h-4 w-4" /> Strategic Map
+                </Button>
                 <Button variant="outline" size="sm" onClick={handleExport} className="border-neutral-700 bg-neutral-800/50 hover:bg-neutral-800 hover:text-primary">
                   <Download className="mr-2 h-4 w-4" /> Seal Scroll
                 </Button>
@@ -190,6 +202,35 @@ export default function Dashboard() {
         </header>
 
         <main className="container mx-auto px-4 py-8">
+          <AnimatePresence>
+            {showMap && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                className="mb-8 overflow-hidden"
+              >
+                <ShinobiMap 
+                  tasks={tasks || []} 
+                  onVillageClick={(v) => setMapVillageFilter(mapVillageFilter === v ? null : v)}
+                  activeVillage={mapVillageFilter || undefined}
+                />
+                {mapVillageFilter && (
+                  <div className="flex justify-center mt-4">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => setMapVillageFilter(null)}
+                      className="text-primary hover:text-primary hover:bg-primary/10 font-bold"
+                    >
+                      <X className="mr-2 h-4 w-4" /> Clear Map Filter ({SHINOBI_DATA.villages.find(v => v.id === mapVillageFilter)?.name})
+                    </Button>
+                  </div>
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">
             <TabsList className="bg-neutral-900 border border-neutral-800 p-1">
               <TabsTrigger value="active" className="data-[state=active]:bg-primary data-[state=active]:text-black font-bold">Active Missions</TabsTrigger>
