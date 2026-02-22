@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Timer, Coffee, Flame, RotateCcw } from "lucide-react";
+import { Timer, Coffee, Flame, RotateCcw, Volume2, Bell } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 type TimerMode = "SAGE" | "BREAK";
 
@@ -9,6 +10,7 @@ export function NinjaTimer() {
   const [mode, setMode] = useState<TimerMode>("SAGE");
   const [timeLeft, setTimeLeft] = useState(25 * 60);
   const [isActive, setIsActive] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -16,12 +18,30 @@ export function NinjaTimer() {
       interval = setInterval(() => {
         setTimeLeft((prev) => prev - 1);
       }, 1000);
-    } else if (timeLeft === 0) {
+    } else if (timeLeft === 0 && isActive) {
       setIsActive(false);
-      // Optional: sound notification
+      const title = mode === "SAGE" ? "Sage Mode Complete!" : "Break Finished!";
+      const description = mode === "SAGE" ? "Your chakra is replenished. Ready for a break?" : "Break is over. Time to focus, shinobi!";
+      
+      toast({
+        title,
+        description,
+        className: "bg-primary text-primary-foreground border-2 border-black font-display",
+      });
+
+      // Play a kunai sound or similar if we had assets
+      if ('Notification' in window && Notification.permission === 'granted') {
+        new Notification(title, { body: description });
+      }
     }
     return () => clearInterval(interval);
-  }, [isActive, timeLeft]);
+  }, [isActive, timeLeft, mode, toast]);
+
+  useEffect(() => {
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+  }, []);
 
   const toggleTimer = () => setIsActive(!isActive);
   
