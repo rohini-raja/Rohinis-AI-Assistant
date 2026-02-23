@@ -8,9 +8,21 @@ type TimerMode = "SAGE" | "BREAK";
 
 export function NinjaTimer() {
   const [mode, setMode] = useState<TimerMode>("SAGE");
-  const [timeLeft, setTimeLeft] = useState(25 * 60);
+  const [sageDuration, setSageDuration] = useState(parseInt(localStorage.getItem("ninja-sage-duration") || "25"));
+  const [breakDuration, setBreakDuration] = useState(parseInt(localStorage.getItem("ninja-break-duration") || "5"));
+  const [timeLeft, setTimeLeft] = useState(mode === "SAGE" ? sageDuration * 60 : breakDuration * 60);
   const [isActive, setIsActive] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const { toast } = useToast();
+
+  useEffect(() => {
+    setTimeLeft(mode === "SAGE" ? sageDuration * 60 : breakDuration * 60);
+  }, [sageDuration, breakDuration, mode]);
+
+  useEffect(() => {
+    localStorage.setItem("ninja-sage-duration", sageDuration.toString());
+    localStorage.setItem("ninja-break-duration", breakDuration.toString());
+  }, [sageDuration, breakDuration]);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -86,10 +98,36 @@ export function NinjaTimer() {
         </div>
       </div>
 
-      <div className="text-center py-4">
-        <span className="text-5xl font-mono font-bold text-white tracking-tighter">
-          {minutes.toString().padStart(2, '0')}:{seconds.toString().padStart(2, '0')}
-        </span>
+      <div className="text-center py-4 relative group">
+        {isEditing ? (
+          <div className="flex flex-col gap-2 items-center">
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-bold text-neutral-500 uppercase">Set {mode}:</span>
+              <input 
+                type="number" 
+                value={mode === "SAGE" ? sageDuration : breakDuration}
+                onChange={(e) => {
+                  const val = Math.max(1, parseInt(e.target.value) || 1);
+                  if (mode === "SAGE") setSageDuration(val);
+                  else setBreakDuration(val);
+                }}
+                className="w-16 bg-neutral-950 border border-primary/30 rounded px-2 py-1 text-white text-xl font-mono"
+              />
+              <span className="text-[10px] font-bold text-neutral-500 uppercase">Min</span>
+            </div>
+            <Button size="sm" variant="ghost" className="h-6 text-[10px]" onClick={() => setIsEditing(false)}>SAVE</Button>
+          </div>
+        ) : (
+          <>
+            <span 
+              className="text-5xl font-mono font-bold text-white tracking-tighter cursor-pointer hover:text-primary transition-colors"
+              onClick={() => !isActive && setIsEditing(true)}
+            >
+              {minutes.toString().padStart(2, '0')}:{seconds.toString().padStart(2, '0')}
+            </span>
+            <p className="text-[8px] text-neutral-600 uppercase mt-1 opacity-0 group-hover:opacity-100 transition-opacity">Click to adjust time</p>
+          </>
+        )}
       </div>
 
       <div className="flex gap-2 mt-4">

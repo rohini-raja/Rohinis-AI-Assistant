@@ -6,19 +6,23 @@ import { useState, useRef, useEffect } from "react";
 
 // Using a public collection of Naruto-themed Lofi / OST links (Direct URLs)
 const DEFAULT_PLAYLIST = [
+  { title: "Hero's Come Back!!", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3", artist: "nobodyknows+" },
+  { title: "Blue Bird", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3", artist: "Ikimono-gakari" },
+  { title: "Silhouette", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3", artist: "KANA-BOON" },
+  { title: "Sign", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3", artist: "FLOW" },
+  { title: "Go!!!", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3", artist: "FLOW" },
   { title: "Naruto Main Theme (Lofi)", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3", artist: "Shinobi Beats" },
   { title: "Sadness and Sorrow", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3", artist: "Leaf Village" },
-  { title: "Blue Bird (Instrumental)", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3", artist: "Hidden Cloud" }
 ];
 
 export function NinjaMelodies() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
-  const [playlist, setPlaylist] = useState(DEFAULT_PLAYLIST);
+  const [playlist] = useState(DEFAULT_PLAYLIST);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  const currentTrack = playlist[currentTrackIndex];
+  const currentTrack = DEFAULT_PLAYLIST[currentTrackIndex];
 
   useEffect(() => {
     if (audioRef.current) {
@@ -33,27 +37,27 @@ export function NinjaMelodies() {
   const togglePlay = () => setIsPlaying(!isPlaying);
   
   const nextTrack = () => {
-    setCurrentTrackIndex((prev) => (prev + 1) % playlist.length);
+    setCurrentTrackIndex((prev) => (prev + 1) % DEFAULT_PLAYLIST.length);
   };
 
   const prevTrack = () => {
-    setCurrentTrackIndex((prev) => (prev - 1 + playlist.length) % playlist.length);
+    setCurrentTrackIndex((prev) => (prev - 1 + DEFAULT_PLAYLIST.length) % DEFAULT_PLAYLIST.length);
   };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!searchQuery.trim()) {
-      setPlaylist(DEFAULT_PLAYLIST);
-      return;
-    }
-    // Simple mock search filtering current playlist
-    const filtered = DEFAULT_PLAYLIST.filter(t => 
-      t.title.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-    if (filtered.length > 0) {
-      setPlaylist(filtered);
-      setCurrentTrackIndex(0);
-    }
+  };
+
+  const filteredPlaylist = DEFAULT_PLAYLIST.filter(t => 
+    t.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    t.artist.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const selectTrack = (index: number) => {
+    const track = filteredPlaylist[index];
+    const originalIndex = DEFAULT_PLAYLIST.findIndex(t => t.url === track.url);
+    setCurrentTrackIndex(originalIndex);
+    setIsPlaying(true);
   };
 
   return (
@@ -116,6 +120,23 @@ export function NinjaMelodies() {
           <div className="flex-1 h-1 bg-neutral-800 rounded-full overflow-hidden">
             <div className={`h-full bg-primary transition-all duration-300 ${isPlaying ? 'w-full' : 'w-0'}`} />
           </div>
+        </div>
+
+        {/* Search Results / Track List */}
+        <div className="w-full mt-2 max-h-32 overflow-y-auto custom-scrollbar space-y-1">
+          {filteredPlaylist.map((track, idx) => (
+            <button
+              key={track.title}
+              onClick={() => selectTrack(idx)}
+              className={`w-full text-left px-2 py-1.5 rounded text-[9px] transition-colors flex items-center justify-between group ${currentTrack.url === track.url ? 'bg-primary/20 text-primary' : 'hover:bg-neutral-800 text-neutral-400'}`}
+            >
+              <div className="truncate pr-2">
+                <p className="font-bold truncate">{track.title}</p>
+                <p className="opacity-60 truncate">{track.artist}</p>
+              </div>
+              {currentTrack.url === track.url && isPlaying && <Loader2 className="h-3 w-3 animate-spin shrink-0" />}
+            </button>
+          ))}
         </div>
       </div>
     </Card>
