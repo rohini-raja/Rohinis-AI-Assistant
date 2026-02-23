@@ -18,11 +18,11 @@ export function QuickNotes() {
     queryKey: ["/api/notes"],
   });
 
-  const filteredNotes = notes?.filter(n => {
+  const filteredNotes = (notes || []).filter(n => {
     if (filter === "active") return !n.completed;
     if (filter === "done") return n.completed;
     return true;
-  }) || [];
+  });
 
   const addNote = useMutation({
     mutationFn: (newNote: { content: string }) => apiRequest("POST", "/api/notes", newNote),
@@ -73,7 +73,7 @@ export function QuickNotes() {
           <div className="animate-pulse space-y-2">
             {[1, 2, 3].map(i => <div key={i} className="h-8 bg-neutral-800 rounded" />)}
           </div>
-        ) : notes?.map((note) => (
+        ) : filteredNotes.map((note) => (
           <div key={note.id} className="flex items-center gap-2 group p-1 hover:bg-neutral-800 rounded transition-colors">
             <Checkbox 
               checked={note.completed} 
