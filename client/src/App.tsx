@@ -104,6 +104,10 @@ function App() {
                     { id: 'cyan', color: '180 80% 40%' },
                     { id: 'green', color: '120 80% 40%' },
                     { id: 'gold', color: '45 90% 50%' },
+                    { id: 'orange', color: '25 100% 50%' },
+                    { id: 'red', color: '0 100% 50%' },
+                    { id: 'blue', color: '210 100% 50%' },
+                    { id: 'teal', color: '160 100% 40%' },
                   ].map(c => (
                     <button
                       key={c.id}
