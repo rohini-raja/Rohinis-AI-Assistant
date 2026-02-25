@@ -23,6 +23,25 @@ export function ShinobiMap({ tasks, onVillageClick, activeVillage }: ShinobiMapP
       {/* Map Background (Stylized) */}
       <div className="absolute inset-0 opacity-40 bg-[url('https://www.transparenttextures.com/patterns/old-map.png')]" />
       
+      {/* The Forest of Focus */}
+      <div className="absolute inset-0 pointer-events-none z-10">
+        {(() => {
+          try {
+            return JSON.parse(localStorage.getItem("ninja-forest") || "[]").map((tree: any) => (
+              <motion.div
+                key={tree.id}
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                className="absolute text-green-500/60 drop-shadow-[0_0_5px_rgba(0,255,0,0.3)]"
+                style={{ left: `${tree.x}%`, top: `${tree.y}%`, fontSize: '14px' }}
+              >
+                🌲
+              </motion.div>
+            ));
+          } catch (e) { return null; }
+        })()}
+      </div>
+
       {/* Decorative Elements */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-10 left-10 text-[10px] font-mono text-primary/20 uppercase tracking-[0.5em] rotate-45">Great Ninja Ocean</div>

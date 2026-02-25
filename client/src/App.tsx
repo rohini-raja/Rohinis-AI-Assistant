@@ -74,6 +74,16 @@ function App() {
                   <option value="modern">Modern (Hidden Village)</option>
                   <option value="mono">Data Scroll (Mono)</option>
                   <option value="serif">Ancient Seal (Serif)</option>
+                  <option value="inter">Professional (Inter)</option>
+                  <option value="playfair">Elegance (Playfair)</option>
+                  <option value="roboto">Technical (Roboto)</option>
+                  <option value="oswald">Command (Oswald)</option>
+                  <option value="merriweather">Library (Merriweather)</option>
+                  <option value="montserrat">Vibrant (Montserrat)</option>
+                  <option value="source">Code (Source Code)</option>
+                  <option value="ubuntu">Agile (Ubuntu)</option>
+                  <option value="lato">Balanced (Lato)</option>
+                  <option value="poppins">Pop (Poppins)</option>
                 </select>
               </div>
 

@@ -28,7 +28,25 @@ export function NinjaTimer() {
     let interval: NodeJS.Timeout;
     if (isActive && timeLeft > 0) {
       interval = setInterval(() => {
-        setTimeLeft((prev) => prev - 1);
+        setTimeLeft((prev) => {
+          const newTime = prev - 1;
+          // Every 30 minutes (1800 seconds) of Sage Mode
+          if (mode === "SAGE" && (sageDuration * 60 - newTime) % 1800 === 0 && (sageDuration * 60 - newTime) > 0) {
+            const trees = JSON.parse(localStorage.getItem("ninja-forest") || "[]");
+            trees.push({ 
+              id: Date.now(), 
+              x: Math.random() * 100, 
+              y: Math.random() * 100,
+              missionId: localStorage.getItem("active-mission-id") 
+            });
+            localStorage.setItem("ninja-forest", JSON.stringify(trees));
+            toast({
+              title: "Tree Planted!",
+              description: "Your focus has grown a new tree in the Shinobi Forest.",
+            });
+          }
+          return newTime;
+        });
       }, 1000);
     } else if (timeLeft === 0 && isActive) {
       setIsActive(false);
