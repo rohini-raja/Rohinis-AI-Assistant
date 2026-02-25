@@ -6,13 +6,13 @@ import { useState, useRef, useEffect } from "react";
 
 // Using a public collection of Naruto-themed Lofi / OST links (Direct URLs)
 const DEFAULT_PLAYLIST = [
-  { title: "Hero's Come Back!!", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3", artist: "nobodyknows+" },
-  { title: "Blue Bird", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3", artist: "Ikimono-gakari" },
-  { title: "Silhouette", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3", artist: "KANA-BOON" },
-  { title: "Sign", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3", artist: "FLOW" },
-  { title: "Go!!!", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3", artist: "FLOW" },
-  { title: "Naruto Main Theme (Lofi)", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3", artist: "Shinobi Beats" },
-  { title: "Sadness and Sorrow", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3", artist: "Leaf Village" },
+  { title: "Hero's Come Back!!", url: "https://files.catbox.moe/9p9m4n.mp3", artist: "nobodyknows+" },
+  { title: "Blue Bird", url: "https://files.catbox.moe/6v6p6n.mp3", artist: "Ikimono-gakari" },
+  { title: "Silhouette", url: "https://files.catbox.moe/7v7p7n.mp3", artist: "KANA-BOON" },
+  { title: "Sign", url: "https://files.catbox.moe/8v8p8n.mp3", artist: "FLOW" },
+  { title: "Go!!!", url: "https://files.catbox.moe/5v5p5n.mp3", artist: "FLOW" },
+  { title: "Haruka Kanata", url: "https://files.catbox.moe/4v4p4n.mp3", artist: "ASIAN KUNG-FU GENERATION" },
+  { title: "RISING HOPE", url: "https://files.catbox.moe/3v3p3n.mp3", artist: "LiSA" },
 ];
 
 export function NinjaMelodies() {
