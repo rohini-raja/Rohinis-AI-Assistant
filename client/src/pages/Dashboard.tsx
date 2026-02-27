@@ -11,6 +11,7 @@ import { NinjaTimer } from "@/components/NinjaTimer";
 import { QuickNotes } from "@/components/QuickNotes";
 import { NinjaMelodies } from "@/components/NinjaMelodies";
 import { ShinobiMap } from "@/components/ShinobiMap";
+import { NinjaCalendar } from "@/components/NinjaCalendar";
 
 export default function Dashboard() {
   const { data: tasks, isLoading, error } = useTasks();
@@ -123,6 +124,7 @@ export default function Dashboard() {
           >
             <div className="space-y-6 pb-10">
               <NinjaTimer />
+              <NinjaCalendar tasks={tasks || []} />
               <QuickNotes />
               <NinjaMelodies />
             </div>
