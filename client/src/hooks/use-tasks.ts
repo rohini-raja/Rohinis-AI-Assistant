@@ -14,6 +14,11 @@ export const SHINOBI_DATA = {
     { id: "madara", name: "Madara Uchiha", village: "leaf", team: "legendary", quote: "Wake up to reality! Nothing ever goes as planned in this world." },
     { id: "jiraiya", name: "Jiraiya", village: "leaf", team: "sannin", quote: "A person's life is not measured by what they do but by what they've done for others." },
     { id: "tsunade", name: "Tsunade", village: "leaf", team: "sannin", quote: "People become stronger because they have memories they can't forget." },
+    { id: "hashirama", name: "Hashirama Senju", village: "leaf", team: "hokage", quote: "Whenever you live, there will always be war." },
+    { id: "tobirama", name: "Tobirama Senju", village: "leaf", team: "hokage", quote: "The Uchiha are a clan possessed by evil." },
+    { id: "hiruzen", name: "Hiruzen Sarutobi", village: "leaf", team: "hokage", quote: "Where the tree leaves dance, one shall find flames." },
+    { id: "minato", name: "Minato Namikaze", village: "leaf", team: "hokage", quote: "The true measure of a shinobi is not how he lives but how he dies." },
+    { id: "kakashi_hokage", name: "Kakashi Hatake (6th)", village: "leaf", team: "hokage", quote: "I will protect my comrades no matter what." },
   ],
   quotes: [
     { text: "I'm not gonna run away, I never go back on my word! That's my nindo: my ninja way!", author: "Naruto Uzumaki" },
@@ -50,6 +55,7 @@ export const SHINOBI_DATA = {
     { id: "akatsuki", name: "Akatsuki", color: "red" },
     { id: "sand_siblings", name: "Sand Siblings", color: "yellow" },
     { id: "sannin", name: "Legendary Sannin", color: "green" },
+    { id: "hokage", name: "Hokage", color: "red" },
   ],
   villages: [
     { id: "leaf", name: "Hidden Leaf", color: "24 95% 53%" },
@@ -57,6 +63,7 @@ export const SHINOBI_DATA = {
     { id: "mist", name: "Hidden Mist", color: "200 80% 60%" },
     { id: "cloud", name: "Hidden Cloud", color: "260 70% 70%" },
     { id: "rock", name: "Hidden Rock", color: "15 50% 40%" },
+    { id: "meeting", name: "Hokage Summit", color: "0 100% 50%" },
   ]
 };
 

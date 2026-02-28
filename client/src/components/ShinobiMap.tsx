@@ -15,7 +15,18 @@ const VILLAGE_POSITIONS: Record<string, { x: string; y: string }> = {
   mist: { x: "80%", y: "50%" },
   cloud: { x: "70%", y: "20%" },
   rock: { x: "30%", y: "25%" },
+  meeting: { x: "50%", y: "15%" },
 };
+
+const HOKAGES = [
+  { id: "h1", name: "1st: Hashirama", x: "46%", y: "38%", color: "#22c55e" },
+  { id: "h2", name: "2nd: Tobirama", x: "48%", y: "38%", color: "#3b82f6" },
+  { id: "h3", name: "3rd: Hiruzen", x: "50%", y: "38%", color: "#ef4444" },
+  { id: "h4", name: "4th: Minato", x: "52%", y: "38%", color: "#eab308" },
+  { id: "h5", name: "5th: Tsunade", x: "54%", y: "38%", color: "#ec4899" },
+  { id: "h6", name: "6th: Kakashi", x: "51%", y: "41%", color: "#64748b" },
+  { id: "h7", name: "7th: Naruto", x: "49%", y: "41%", color: "#f97316" },
+];
 
 export function ShinobiMap({ tasks, onVillageClick, activeVillage }: ShinobiMapProps) {
   return (
@@ -49,6 +60,25 @@ export function ShinobiMap({ tasks, onVillageClick, activeVillage }: ShinobiMapP
       </div>
 
       <TooltipProvider>
+        {/* Hokage Meeting Points */}
+        {HOKAGES.map((hokage) => (
+          <Tooltip key={hokage.id}>
+            <TooltipTrigger asChild>
+              <motion.div
+                className="absolute w-2 h-2 rounded-full border border-white/50 z-30 cursor-help"
+                style={{ left: hokage.x, top: hokage.y, backgroundColor: hokage.color }}
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                whileHover={{ scale: 2, zIndex: 40 }}
+              />
+            </TooltipTrigger>
+            <TooltipContent className="bg-neutral-900 border-primary/50 text-white p-2">
+              <p className="font-display text-[10px] uppercase tracking-tighter">{hokage.name}</p>
+              <p className="text-[8px] text-neutral-400">Presiding over Leaf Village</p>
+            </TooltipContent>
+          </Tooltip>
+        ))}
+
         {SHINOBI_DATA.villages.map((village) => {
           const pos = VILLAGE_POSITIONS[village.id] || { x: "0%", y: "0%" };
           const villageTasks = tasks.filter(t => t.village === village.id && t.status === 'pending');
@@ -108,6 +138,10 @@ export function ShinobiMap({ tasks, onVillageClick, activeVillage }: ShinobiMapP
         <div className="flex items-center gap-2">
           <div className="w-2 h-2 rounded-full bg-neutral-700" />
           <span>No Missions Pending</span>
+        </div>
+        <div className="flex items-center gap-2 mt-1">
+          <div className="w-2 h-2 rounded-full border border-white/30 bg-red-500" />
+          <span>Hokage Council</span>
         </div>
       </div>
     </div>
