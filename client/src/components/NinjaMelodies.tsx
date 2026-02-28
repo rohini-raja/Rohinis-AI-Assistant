@@ -16,6 +16,11 @@ const DEFAULT_PLAYLIST = [
   { title: "Closer", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3", artist: "Joe Inoue" },
   { title: "Hotaru no Hikari", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-9.mp3", artist: "Ikimono-gakari" },
   { title: "Toubi", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-10.mp3", artist: "7!! Seven Oops" },
+  { title: "Guren (Lofi)", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-11.mp3", artist: "Shinobi Beats" },
+  { title: "Samidare (Lofi)", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-12.mp3", artist: "Hidden Leaf" },
+  { title: "Loneliness (Lofi)", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-13.mp3", artist: "Ninja Vibes" },
+  { title: "Decision (Lofi)", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-14.mp3", artist: "Shinobi Chill" },
+  { title: "Man of the World (Lofi)", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-15.mp3", artist: "Leaf Village" },
 ];
 
 export function NinjaMelodies() {
