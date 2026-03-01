@@ -20,6 +20,7 @@ function Router() {
 function App() {
   const [theme, setTheme] = useState(localStorage.getItem("ninja-theme") || "dark");
   const [font, setFont] = useState(localStorage.getItem("ninja-font") || "body");
+  const [selectedHokage, setSelectedHokage] = useState(localStorage.getItem("ninja-selected-hokage") || "tsunade");
 
   useEffect(() => {
     document.documentElement.className = theme === "dark" ? "" : "light";
@@ -40,7 +41,8 @@ function App() {
 
     localStorage.setItem("ninja-theme", theme);
     localStorage.setItem("ninja-font", font);
-  }, [theme, font]);
+    localStorage.setItem("ninja-selected-hokage", selectedHokage);
+  }, [theme, font, selectedHokage]);
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -84,6 +86,23 @@ function App() {
                   <option value="ubuntu">Agile (Ubuntu)</option>
                   <option value="lato">Balanced (Lato)</option>
                   <option value="poppins">Pop (Poppins)</option>
+                </select>
+              </div>
+
+              <div className="flex flex-col gap-1 px-1">
+                <span className="text-[10px] font-bold text-primary uppercase">Leaf Overseer</span>
+                <select 
+                  value={selectedHokage} 
+                  onChange={(e) => setSelectedHokage(e.target.value)}
+                  className="p-1.5 bg-neutral-800 text-white rounded-lg text-[10px] border border-primary/30 outline-none focus:border-primary"
+                >
+                  <option value="hashirama">1st: Hashirama</option>
+                  <option value="tobirama">2nd: Tobirama</option>
+                  <option value="hiruzen">3rd: Hiruzen</option>
+                  <option value="minato">4th: Minato</option>
+                  <option value="tsunade">5th: Tsunade</option>
+                  <option value="kakashi_hokage">6th: Kakashi</option>
+                  <option value="naruto">7th: Naruto</option>
                 </select>
               </div>
 
