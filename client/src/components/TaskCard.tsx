@@ -48,6 +48,10 @@ export function TaskCard({ task }: TaskCardProps) {
 
   const charData = SHINOBI_DATA.characters.find(c => c.id === task.character);
   const teamData = SHINOBI_DATA.teams.find(t => t.id === task.team);
+  
+  // Find the Kage for this village
+  const villageKage = SHINOBI_DATA.characters.find(c => c.village === task.village && c.team === 'kage') || 
+                     SHINOBI_DATA.characters.find(c => c.village === task.village && c.team === 'hokage');
 
   const handleToggleStatus = () => {
     const newStatus = task.status === 'pending' ? 'completed' : 'pending';
@@ -81,6 +85,36 @@ export function TaskCard({ task }: TaskCardProps) {
       character={task.character}
       className={`transition-all duration-300 relative group/card ${task.status === 'completed' ? 'opacity-70 grayscale-[0.5]' : ''}`}
     >
+      {/* Kage Animation Overlay */}
+      {villageKage && (
+        <motion.div 
+          className="absolute top-2 left-2 flex flex-col items-center z-20 pointer-events-none"
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          whileHover={{ scale: 1.1 }}
+        >
+          <div className="relative">
+            <motion.div 
+              animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.6, 0.3] }}
+              transition={{ duration: 3, repeat: Infinity }}
+              className="absolute inset-0 bg-primary rounded-full blur-md"
+            />
+            <div className="w-12 h-12 rounded-full border-2 border-primary overflow-hidden bg-neutral-900 relative">
+              <img 
+                src={`/images/characters/${villageKage.id}.png`} 
+                alt={villageKage.name}
+                className="w-full h-full object-cover"
+                onError={(e) => (e.currentTarget.style.display = 'none')}
+              />
+              {!villageKage.id && <Crown className="w-6 h-6 m-2.5 text-primary" />}
+            </div>
+          </div>
+          <span className="text-[8px] font-display text-primary mt-1 uppercase tracking-tighter bg-black/50 px-1 rounded">
+            Overseen by {villageKage.name.split(' ')[0]}
+          </span>
+        </motion.div>
+      )}
+
       {/* Character Image Overlay */}
       <motion.div 
         className="absolute top-0 right-0 w-32 h-32 pointer-events-none opacity-20 group-hover/card:opacity-40 transition-opacity"

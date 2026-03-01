@@ -14,6 +14,10 @@ export const SHINOBI_DATA = {
     { id: "madara", name: "Madara Uchiha", village: "leaf", team: "legendary", quote: "Wake up to reality! Nothing ever goes as planned in this world." },
     { id: "jiraiya", name: "Jiraiya", village: "leaf", team: "sannin", quote: "A person's life is not measured by what they do but by what they've done for others." },
     { id: "tsunade", name: "Tsunade", village: "leaf", team: "sannin", quote: "People become stronger because they have memories they can't forget." },
+    { id: "gaara_kage", name: "Gaara (Kazekage)", village: "sand", team: "kage", quote: "I live only for myself and love only myself." },
+    { id: "a_kage", name: "A (Raikage)", village: "cloud", team: "kage", quote: "A shinobi's life is a constant battle." },
+    { id: "mei_kage", name: "Mei Terumi (Mizukage)", village: "mist", team: "kage", quote: "I'll give you a kiss that'll melt you away." },
+    { id: "ohnoki_kage", name: "Ohnoki (Tsuchikage)", village: "rock", team: "kage", quote: "Don't underestimate the experience of an old man!" },
     { id: "hashirama", name: "Hashirama Senju", village: "leaf", team: "hokage", quote: "Whenever you live, there will always be war." },
     { id: "tobirama", name: "Tobirama Senju", village: "leaf", team: "hokage", quote: "The Uchiha are a clan possessed by evil." },
     { id: "hiruzen", name: "Hiruzen Sarutobi", village: "leaf", team: "hokage", quote: "Where the tree leaves dance, one shall find flames." },
@@ -56,6 +60,7 @@ export const SHINOBI_DATA = {
     { id: "sand_siblings", name: "Sand Siblings", color: "yellow" },
     { id: "sannin", name: "Legendary Sannin", color: "green" },
     { id: "hokage", name: "Hokage", color: "red" },
+    { id: "kage", name: "Five Kage", color: "purple" },
   ],
   villages: [
     { id: "leaf", name: "Hidden Leaf", color: "24 95% 53%" },
