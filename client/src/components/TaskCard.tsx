@@ -128,9 +128,13 @@ export function TaskCard({ task }: TaskCardProps) {
             >
               {villageKage.id ? (
                 <img 
-                  src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${villageKage.id}&backgroundColor=b6e3f4,c0aede,d1d4f9`} 
+                  src={`/images/characters/${villageKage.id}.png`} 
                   alt={villageKage.name}
                   className="w-full h-full object-cover"
+                  onError={(e) => {
+                    // Fallback to DiceBear if generated image isn't ready or missing
+                    e.currentTarget.src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${villageKage.id}&backgroundColor=b6e3f4,c0aede,d1d4f9`;
+                  }}
                 />
               ) : (
                 <Crown className="w-5 h-5 m-2.5 text-primary" />
