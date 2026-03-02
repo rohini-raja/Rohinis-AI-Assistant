@@ -126,13 +126,15 @@ export function TaskCard({ task }: TaskCardProps) {
               }}
               transition={{ duration: 2, repeat: Infinity }}
             >
-              <img 
-                src={`/images/characters/${villageKage.id}.png`} 
-                alt={villageKage.name}
-                className="w-full h-full object-cover"
-                onError={(e) => (e.currentTarget.style.display = 'none')}
-              />
-              {!villageKage.id && <Crown className="w-5 h-5 m-2.5 text-primary" />}
+              {villageKage.id ? (
+                <img 
+                  src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${villageKage.id}&backgroundColor=b6e3f4,c0aede,d1d4f9`} 
+                  alt={villageKage.name}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <Crown className="w-5 h-5 m-2.5 text-primary" />
+              )}
             </motion.div>
           </div>
           <div className="flex flex-col">
@@ -154,10 +156,9 @@ export function TaskCard({ task }: TaskCardProps) {
         whileHover={{ scale: 1.1, rotate: 5 }}
       >
         <img 
-          src={`/images/characters/${task.character}.png`} 
+          src={`https://api.dicebear.com/7.x/bottts/svg?seed=${task.character}&backgroundColor=b6e3f4,c0aede,d1d4f9`} 
           alt={task.character}
           className="w-full h-full object-contain"
-          onError={(e) => (e.currentTarget.style.display = 'none')}
         />
       </motion.div>
 
