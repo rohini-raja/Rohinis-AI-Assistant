@@ -41,8 +41,14 @@ function App() {
 
     localStorage.setItem("ninja-theme", theme);
     localStorage.setItem("ninja-font", font);
+  }, [theme, font]);
+
+  // Separate effect for Hokage to avoid re-rendering entire app styles unnecessarily
+  useEffect(() => {
     localStorage.setItem("ninja-selected-hokage", selectedHokage);
-  }, [theme, font, selectedHokage]);
+    // Dispatch a custom event so other components can update immediately without waiting for storage events
+    window.dispatchEvent(new CustomEvent("hokage-changed", { detail: selectedHokage }));
+  }, [selectedHokage]);
 
   return (
     <QueryClientProvider client={queryClient}>

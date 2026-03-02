@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { format } from "date-fns";
 import { Check, Trash2, ShieldAlert, Shield, ShieldCheck, Crown, Scroll, Send, Heart, HeartOff } from "lucide-react";
 import { useUpdateTask, useDeleteTask, useAddTaskUpdate, SHINOBI_DATA } from "@/hooks/use-tasks";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface TaskCardProps {
@@ -45,14 +45,22 @@ export function TaskCard({ task }: TaskCardProps) {
   const deleteTask = useDeleteTask();
   const addUpdate = useAddTaskUpdate();
   const [updateText, setUpdateText] = useState("");
+  const [currentHokageId, setCurrentHokageId] = useState(localStorage.getItem("ninja-selected-hokage") || "tsunade");
+
+  useEffect(() => {
+    const handleHokageChange = (e: any) => {
+      setCurrentHokageId(e.detail);
+    };
+    window.addEventListener("hokage-changed", handleHokageChange);
+    return () => window.removeEventListener("hokage-changed", handleHokageChange);
+  }, []);
 
   const charData = SHINOBI_DATA.characters.find(c => c.id === task.character);
   const teamData = SHINOBI_DATA.teams.find(t => t.id === task.team);
   
   // Find the Kage for this village
-  const userHokage = localStorage.getItem("ninja-selected-hokage") || "tsunade";
   const villageKage = task.village === "leaf" 
-    ? SHINOBI_DATA.characters.find(c => c.id === userHokage)
+    ? SHINOBI_DATA.characters.find(c => c.id === currentHokageId)
     : (SHINOBI_DATA.characters.find(c => c.village === task.village && c.team === 'kage') || 
        SHINOBI_DATA.characters.find(c => c.village === task.village && c.team === 'hokage'));
 
@@ -94,15 +102,30 @@ export function TaskCard({ task }: TaskCardProps) {
           className="absolute top-4 left-4 flex items-center gap-3 z-20 pointer-events-none"
           initial={{ opacity: 0, x: -10 }}
           animate={{ opacity: 1, x: 0 }}
+          key={villageKage.id} // Add key for immediate re-animation on switch
           whileHover={{ scale: 1.05 }}
         >
           <div className="relative">
             <motion.div 
-              animate={{ scale: [1, 1.1, 1], opacity: [0.2, 0.4, 0.2] }}
-              transition={{ duration: 3, repeat: Infinity }}
-              className="absolute inset-0 bg-primary rounded-full blur-md"
+              animate={{ 
+                scale: [1, 1.15, 1], 
+                opacity: [0.2, 0.5, 0.2],
+                rotate: [0, 5, -5, 0] 
+              }}
+              transition={{ 
+                duration: 4, 
+                repeat: Infinity,
+                ease: "easeInOut" 
+              }}
+              className="absolute inset-0 bg-primary rounded-full blur-lg"
             />
-            <div className="w-10 h-10 rounded-full border-2 border-primary/50 overflow-hidden bg-neutral-900 relative">
+            <motion.div 
+              className="w-10 h-10 rounded-full border-2 border-primary/50 overflow-hidden bg-neutral-900 relative shadow-[0_0_10px_rgba(var(--primary),0.3)]"
+              animate={{
+                boxShadow: ["0 0 5px rgba(var(--primary), 0.2)", "0 0 15px rgba(var(--primary), 0.5)", "0 0 5px rgba(var(--primary), 0.2)"]
+              }}
+              transition={{ duration: 2, repeat: Infinity }}
+            >
               <img 
                 src={`/images/characters/${villageKage.id}.png`} 
                 alt={villageKage.name}
@@ -110,13 +133,17 @@ export function TaskCard({ task }: TaskCardProps) {
                 onError={(e) => (e.currentTarget.style.display = 'none')}
               />
               {!villageKage.id && <Crown className="w-5 h-5 m-2.5 text-primary" />}
-            </div>
+            </motion.div>
           </div>
           <div className="flex flex-col">
             <span className="text-[7px] text-neutral-500 uppercase font-mono tracking-tighter">Mission Overseer</span>
-            <span className="text-[9px] font-display text-primary uppercase tracking-tighter leading-none">
+            <motion.span 
+              className="text-[9px] font-display text-primary uppercase tracking-tighter leading-none"
+              animate={{ opacity: [1, 0.7, 1] }}
+              transition={{ duration: 3, repeat: Infinity }}
+            >
               {villageKage.name}
-            </span>
+            </motion.span>
           </div>
         </motion.div>
       )}
