@@ -18,11 +18,11 @@ export const SHINOBI_DATA = {
     { id: "a_kage", name: "A (Raikage)", village: "cloud", team: "kage", quote: "A shinobi's life is a constant battle." },
     { id: "mei_kage", name: "Mei Terumi (Mizukage)", village: "mist", team: "kage", quote: "I'll give you a kiss that'll melt you away." },
     { id: "ohnoki_kage", name: "Ohnoki (Tsuchikage)", village: "rock", team: "kage", quote: "Don't underestimate the experience of an old man!" },
+    { id: "kakashi_hokage", name: "Kakashi Hatake (6th)", village: "leaf", team: "hokage", quote: "I will protect my comrades no matter what." },
     { id: "hashirama", name: "Hashirama Senju", village: "leaf", team: "hokage", quote: "Whenever you live, there will always be war." },
     { id: "tobirama", name: "Tobirama Senju", village: "leaf", team: "hokage", quote: "The Uchiha are a clan possessed by evil." },
     { id: "hiruzen", name: "Hiruzen Sarutobi", village: "leaf", team: "hokage", quote: "Where the tree leaves dance, one shall find flames." },
     { id: "minato", name: "Minato Namikaze", village: "leaf", team: "hokage", quote: "The true measure of a shinobi is not how he lives but how he dies." },
-    { id: "kakashi_hokage", name: "Kakashi Hatake (6th)", village: "leaf", team: "hokage", quote: "I will protect my comrades no matter what." },
   ],
   quotes: [
     { text: "I'm not gonna run away, I never go back on my word! That's my nindo: my ninja way!", author: "Naruto Uzumaki" },

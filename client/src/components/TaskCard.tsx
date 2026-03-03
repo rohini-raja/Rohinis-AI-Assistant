@@ -172,7 +172,7 @@ export function TaskCard({ task }: TaskCardProps) {
 
       {/* Character Image Overlay */}
       <motion.div 
-        className="absolute top-0 right-0 w-32 h-32 pointer-events-none opacity-20 group-hover/card:opacity-40 transition-opacity"
+        className="absolute top-0 right-0 w-32 h-32 pointer-events-none opacity-40 group-hover/card:opacity-80 transition-opacity"
         whileHover={{ scale: 1.1, rotate: 5 }}
         {...(overseerChar ? kageAnimation : {})}
       >
@@ -180,7 +180,11 @@ export function TaskCard({ task }: TaskCardProps) {
           src={`/images/characters/${overseerChar?.id || task.character}.png`} 
           alt={overseerChar?.id || task.character}
           className="w-full h-full object-contain"
-          onError={(e) => (e.currentTarget.style.display = 'none')}
+          onError={(e) => {
+            console.error(`Failed to load image: /images/characters/${overseerChar?.id || task.character}.png`);
+            // Fallback to DiceBear if local image fails
+            e.currentTarget.src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${overseerChar?.id || task.character}&backgroundColor=b6e3f4,c0aede,d1d4f9`;
+          }}
         />
       </motion.div>
 
