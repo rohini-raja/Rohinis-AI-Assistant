@@ -66,6 +66,24 @@ export function TaskCard({ task }: TaskCardProps) {
 
   const overseerChar = task.village === "leaf" ? villageKage : null;
 
+  // Animation variants for Hokage/Kage
+  const kageAnimation = {
+    animate: {
+      y: [0, -5, 0],
+      rotate: [0, 1, -1, 0],
+      filter: [
+        "drop-shadow(0 0 0px rgba(var(--primary), 0))",
+        "drop-shadow(0 0 10px rgba(var(--primary), 0.5))",
+        "drop-shadow(0 0 0px rgba(var(--primary), 0))"
+      ]
+    },
+    transition: {
+      duration: 4,
+      repeat: Infinity,
+      ease: "easeInOut"
+    }
+  };
+
   const handleToggleStatus = () => {
     const newStatus = task.status === 'pending' ? 'completed' : 'pending';
     const completedAt = newStatus === 'completed' ? new Date().toISOString() : null;
@@ -156,6 +174,7 @@ export function TaskCard({ task }: TaskCardProps) {
       <motion.div 
         className="absolute top-0 right-0 w-32 h-32 pointer-events-none opacity-20 group-hover/card:opacity-40 transition-opacity"
         whileHover={{ scale: 1.1, rotate: 5 }}
+        {...(overseerChar ? kageAnimation : {})}
       >
         <img 
           src={`/images/characters/${overseerChar?.id || task.character}.png`} 
