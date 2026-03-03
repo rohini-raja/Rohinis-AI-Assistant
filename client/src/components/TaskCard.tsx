@@ -64,6 +64,8 @@ export function TaskCard({ task }: TaskCardProps) {
     : (SHINOBI_DATA.characters.find(c => c.village === task.village && c.team === 'kage') || 
        SHINOBI_DATA.characters.find(c => c.village === task.village && c.team === 'hokage'));
 
+  const overseerChar = task.village === "leaf" ? villageKage : null;
+
   const handleToggleStatus = () => {
     const newStatus = task.status === 'pending' ? 'completed' : 'pending';
     const completedAt = newStatus === 'completed' ? new Date().toISOString() : null;
@@ -156,8 +158,8 @@ export function TaskCard({ task }: TaskCardProps) {
         whileHover={{ scale: 1.1, rotate: 5 }}
       >
         <img 
-          src={`/images/characters/${task.character}.png`} 
-          alt={task.character}
+          src={`/images/characters/${overseerChar?.id || task.character}.png`} 
+          alt={overseerChar?.id || task.character}
           className="w-full h-full object-contain"
           onError={(e) => (e.currentTarget.style.display = 'none')}
         />
