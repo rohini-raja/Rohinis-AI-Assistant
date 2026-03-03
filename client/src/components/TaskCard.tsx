@@ -181,9 +181,7 @@ export function TaskCard({ task }: TaskCardProps) {
           alt={overseerChar?.id || task.character}
           className="w-full h-full object-contain"
           onError={(e) => {
-            console.error(`Failed to load image: /images/characters/${overseerChar?.id || task.character}.png`);
-            // Fallback to DiceBear if local image fails
-            e.currentTarget.src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${overseerChar?.id || task.character}&backgroundColor=b6e3f4,c0aede,d1d4f9`;
+            e.currentTarget.style.display = 'none';
           }}
         />
       </motion.div>
