@@ -65,6 +65,7 @@ export function TaskCard({ task }: TaskCardProps) {
        SHINOBI_DATA.characters.find(c => c.village === task.village && c.team === 'hokage'));
 
   const overseerChar = task.village === "leaf" ? villageKage : null;
+  const assignedChar = SHINOBI_DATA.characters.find(c => c.id === task.character);
 
   // Animation variants for Hokage/Kage
   const kageAnimation = {
@@ -174,7 +175,7 @@ export function TaskCard({ task }: TaskCardProps) {
       <motion.div 
         className="absolute top-0 right-0 w-32 h-32 pointer-events-none opacity-40 group-hover/card:opacity-80 transition-opacity"
         whileHover={{ scale: 1.1, rotate: 5 }}
-        {...(overseerChar ? kageAnimation : {})}
+        {...(overseerChar || assignedChar ? kageAnimation : {})}
       >
         <img 
           src={`/images/characters/${overseerChar?.id || task.character}.png`} 
