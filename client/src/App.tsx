@@ -21,27 +21,21 @@ function App() {
   const [theme, setTheme] = useState(localStorage.getItem("ninja-theme") || "dark");
   const [font, setFont] = useState(localStorage.getItem("ninja-font") || "body");
   const [selectedHokage, setSelectedHokage] = useState(localStorage.getItem("ninja-selected-hokage") || "tsunade");
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   useEffect(() => {
-    document.documentElement.className = theme === "dark" ? "" : "light";
+    document.documentElement.className = theme === "dark" ? "dark" : "light";
     document.body.className = `font-${font}`;
-    
-    // Restore accent
-    const savedAccent = localStorage.getItem("ninja-accent");
-    const customAccent = localStorage.getItem("ninja-accent-custom");
-    
-    if (customAccent) {
-      document.documentElement.style.setProperty('--primary', customAccent);
-    } else if (savedAccent) {
-      const village = SHINOBI_DATA.villages.find(vd => vd.id === savedAccent);
-      if (village) {
-        document.documentElement.style.setProperty('--primary', village.color);
-      }
-    }
-
     localStorage.setItem("ninja-theme", theme);
     localStorage.setItem("ninja-font", font);
   }, [theme, font]);
+
+  useEffect(() => {
+    const savedAccent = localStorage.getItem("ninja-accent-custom") || (localStorage.getItem("ninja-accent") ? SHINOBI_DATA.villages.find(v => v.id === localStorage.getItem("ninja-accent"))?.color : null);
+    if (savedAccent) {
+      document.documentElement.style.setProperty('--primary', savedAccent);
+    }
+  }, []);
 
   // Separate effect for Hokage to avoid re-rendering entire app styles unnecessarily
   useEffect(() => {
@@ -57,107 +51,129 @@ function App() {
           <Toaster />
           <Router />
           {/* Settings Toggle Floating Button */}
-          <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2">
-            <div className="bg-neutral-900/80 backdrop-blur-md p-2 rounded-xl border border-primary/20 shadow-2xl flex flex-col gap-2">
-              <div className="flex items-center justify-between gap-4 px-1">
-                <span className="text-[10px] font-bold text-primary uppercase">Appearance</span>
-                <button 
-                  onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                  className="p-1.5 bg-neutral-800 text-primary-foreground rounded-lg hover:bg-neutral-700 transition-colors"
-                >
-                  {theme === "dark" ? "☀️" : "🌙"}
-                </button>
-              </div>
-              
-              <div className="flex flex-col gap-1 px-1">
-                <span className="text-[10px] font-bold text-primary uppercase">Ninja Scroll Font</span>
-                <select 
-                  value={font} 
-                  onChange={(e) => setFont(e.target.value)}
-                  className="p-1.5 bg-neutral-800 text-white rounded-lg text-[10px] border border-primary/30 outline-none focus:border-primary"
-                >
-                  <option value="body">Standard Shinobi</option>
-                  <option value="display">Bangers (Action)</option>
-                  <option value="shinobi">Handwritten (Scroll)</option>
-                  <option value="modern">Modern (Hidden Village)</option>
-                  <option value="mono">Data Scroll (Mono)</option>
-                  <option value="serif">Ancient Seal (Serif)</option>
-                  <option value="inter">Professional (Inter)</option>
-                  <option value="playfair">Elegance (Playfair)</option>
-                  <option value="roboto">Technical (Roboto)</option>
-                  <option value="oswald">Command (Oswald)</option>
-                  <option value="merriweather">Library (Merriweather)</option>
-                  <option value="montserrat">Vibrant (Montserrat)</option>
-                  <option value="source">Code (Source Code)</option>
-                  <option value="ubuntu">Agile (Ubuntu)</option>
-                  <option value="lato">Balanced (Lato)</option>
-                  <option value="poppins">Pop (Poppins)</option>
-                </select>
-              </div>
+          <div className="fixed bottom-4 right-4 z-50 flex flex-col items-end gap-2">
+            <button 
+              onClick={() => setIsSettingsOpen(!isSettingsOpen)}
+              className="p-3 bg-primary text-primary-foreground rounded-full shadow-2xl hover:scale-110 transition-transform flex items-center justify-center border-2 border-black/20"
+            >
+              <span className="text-xl">{isSettingsOpen ? "✕" : "⚙️"}</span>
+            </button>
 
-              <div className="flex flex-col gap-1 px-1">
-                <span className="text-[10px] font-bold text-primary uppercase">Leaf Overseer</span>
-                <select 
-                  value={selectedHokage} 
-                  onChange={(e) => setSelectedHokage(e.target.value)}
-                  className="p-1.5 bg-neutral-800 text-white rounded-lg text-[10px] border border-primary/30 outline-none focus:border-primary"
-                >
-                  <option value="hashirama">1st: Hashirama</option>
-                  <option value="tobirama">2nd: Tobirama</option>
-                  <option value="hiruzen">3rd: Hiruzen</option>
-                  <option value="minato">4th: Minato</option>
-                  <option value="tsunade">5th: Tsunade</option>
-                  <option value="kakashi_hokage">6th: Kakashi</option>
-                  <option value="naruto">7th: Naruto</option>
-                </select>
-              </div>
-
-              <div className="flex flex-col gap-1 px-1">
-                <span className="text-[10px] font-bold text-primary uppercase">Village Accent</span>
-                <div className="flex flex-wrap gap-1.5 max-w-[140px]">
-                  {['leaf', 'mist', 'sand', 'cloud', 'rock'].map(v => (
-                    <button
-                      key={v}
-                      onClick={() => {
-                        const root = document.documentElement;
-                        const village = SHINOBI_DATA.villages.find(vd => vd.id === v);
-                        if (village) {
-                          root.style.setProperty('--primary', village.color);
-                          localStorage.setItem("ninja-accent", v);
-                        }
-                      }}
-                      className={`w-4 h-4 rounded-full border border-white/20 hover:scale-125 transition-transform`}
-                      style={{ 
-                        backgroundColor: `hsl(${SHINOBI_DATA.villages.find(vd => vd.id === v)?.color})` 
-                      }}
-                    />
-                  ))}
-                  {/* Extra custom colors */}
-                  {[
-                    { id: 'purple', color: '280 80% 60%' },
-                    { id: 'pink', color: '330 80% 60%' },
-                    { id: 'cyan', color: '180 80% 40%' },
-                    { id: 'green', color: '120 80% 40%' },
-                    { id: 'gold', color: '45 90% 50%' },
-                    { id: 'orange', color: '25 100% 50%' },
-                    { id: 'red', color: '0 100% 50%' },
-                    { id: 'blue', color: '210 100% 50%' },
-                    { id: 'teal', color: '160 100% 40%' },
-                  ].map(c => (
-                    <button
-                      key={c.id}
-                      onClick={() => {
-                        document.documentElement.style.setProperty('--primary', c.color);
-                        localStorage.setItem("ninja-accent-custom", c.color);
-                        localStorage.removeItem("ninja-accent");
-                      }}
-                      className={`w-4 h-4 rounded-full border border-white/20 hover:scale-125 transition-transform`}
-                      style={{ backgroundColor: `hsl(${c.color})` }}
-                    />
-                  ))}
+            {isSettingsOpen && (
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.9, y: 10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                className="bg-neutral-900/90 backdrop-blur-xl p-4 rounded-2xl border border-primary/20 shadow-2xl flex flex-col gap-4 w-[240px]"
+              >
+                <div className="flex items-center justify-between gap-4 border-b border-white/10 pb-2">
+                  <span className="text-xs font-black text-primary uppercase tracking-widest">Ninja Settings</span>
                 </div>
-              </div>
-            </div>
+
+                <div className="flex items-center justify-between gap-4">
+                  <span className="text-[10px] font-bold text-neutral-400 uppercase">Theme</span>
+                  <button 
+                    onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                    className="px-3 py-1 bg-neutral-800 text-primary rounded-lg hover:bg-neutral-700 transition-colors text-xs font-bold border border-white/5"
+                  >
+                    {theme === "dark" ? "SHADOW" : "LIGHT"}
+                  </button>
+                </div>
+                
+                <div className="flex flex-col gap-2">
+                  <span className="text-[10px] font-bold text-neutral-400 uppercase">Scroll Font</span>
+                  <select 
+                    value={font} 
+                    onChange={(e) => {
+                      const newFont = e.target.value;
+                      setFont(newFont);
+                      document.body.className = `font-${newFont}`;
+                    }}
+                    className="p-2 bg-neutral-800 text-white rounded-lg text-[10px] border border-primary/30 outline-none focus:border-primary transition-all font-sans"
+                  >
+                    <option value="body">Standard Shinobi</option>
+                    <option value="display">Bangers (Action)</option>
+                    <option value="shinobi">Handwritten (Scroll)</option>
+                    <option value="modern">Modern (Hidden Village)</option>
+                    <option value="mono">Data Scroll (Mono)</option>
+                    <option value="serif">Ancient Seal (Serif)</option>
+                  </select>
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <span className="text-[10px] font-bold text-neutral-400 uppercase">Leaf Overseer</span>
+                  <select 
+                    value={selectedHokage} 
+                    onChange={(e) => setSelectedHokage(e.target.value)}
+                    className="p-2 bg-neutral-800 text-white rounded-lg text-[10px] border border-primary/30 outline-none focus:border-primary font-sans"
+                  >
+                    <option value="hashirama">1st: Hashirama</option>
+                    <option value="tobirama">2nd: Tobirama</option>
+                    <option value="hiruzen">3rd: Hiruzen</option>
+                    <option value="minato">4th: Minato</option>
+                    <option value="tsunade">5th: Tsunade</option>
+                    <option value="kakashi_hokage">6th: Kakashi</option>
+                    <option value="naruto">7th: Naruto</option>
+                  </select>
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <span className="text-[10px] font-bold text-neutral-400 uppercase">Village Chakra (Accent)</span>
+                  <div className="flex flex-col gap-3">
+                    <div className="flex flex-wrap gap-2">
+                      {['leaf', 'mist', 'sand', 'cloud', 'rock'].map(v => (
+                        <button
+                          key={v}
+                          onClick={() => {
+                            const village = SHINOBI_DATA.villages.find(vd => vd.id === v);
+                            if (village) {
+                              document.documentElement.style.setProperty('--primary', village.color);
+                              localStorage.setItem("ninja-accent", v);
+                              localStorage.setItem("ninja-accent-custom", village.color);
+                            }
+                          }}
+                          className="w-5 h-5 rounded-full border border-white/20 hover:scale-125 transition-transform shadow-lg"
+                          style={{ 
+                            backgroundColor: `hsl(${SHINOBI_DATA.villages.find(vd => vd.id === v)?.color})` 
+                          }}
+                        />
+                      ))}
+                    </div>
+                    
+                    <div className="flex flex-col gap-1.5">
+                      <span className="text-[8px] text-neutral-500 font-mono">Custom Chakra Seal</span>
+                      <input 
+                        type="color" 
+                        className="w-full h-8 bg-transparent border-none cursor-pointer rounded overflow-hidden"
+                        onChange={(e) => {
+                          // Convert hex to HSL for compatibility with the system
+                          const hex = e.target.value;
+                          const r = parseInt(hex.slice(1, 3), 16) / 255;
+                          const g = parseInt(hex.slice(3, 5), 16) / 255;
+                          const b = parseInt(hex.slice(5, 7), 16) / 255;
+                          const max = Math.max(r, g, b), min = Math.min(r, g, b);
+                          let h, s, l = (max + min) / 2;
+                          if (max === min) { h = s = 0; } else {
+                            const d = max - min;
+                            s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+                            switch (max) {
+                              case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+                              case g: h = (b - r) / d + 2; break;
+                              case b: h = (r - g) / d + 4; break;
+                              default: h = 0; break;
+                            }
+                            h /= 6;
+                          }
+                          const hsl = `${Math.round(h * 360)} ${Math.round(s * 100)}% ${Math.round(l * 100)}%`;
+                          document.documentElement.style.setProperty('--primary', hsl);
+                          localStorage.setItem("ninja-accent-custom", hsl);
+                          localStorage.removeItem("ninja-accent");
+                        }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
           </div>
         </div>
       </TooltipProvider>
