@@ -7,6 +7,7 @@ import Dashboard from "@/pages/Dashboard";
 import NotFound from "@/pages/not-found";
 import { useEffect, useState } from "react";
 import { SHINOBI_DATA } from "@/hooks/use-tasks";
+import { motion } from "framer-motion";
 
 function Router() {
   return (
