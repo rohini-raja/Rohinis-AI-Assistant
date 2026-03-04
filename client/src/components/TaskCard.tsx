@@ -26,15 +26,15 @@ const PriorityIcon = ({ priority }: { priority: string }) => {
 
 const VillageBadge = ({ village }: { village: string }) => {
   const colors: Record<string, string> = {
-    leaf: "bg-orange-500/20 text-orange-400 border-orange-500/50",
-    mist: "bg-blue-500/20 text-blue-400 border-blue-500/50",
-    sand: "bg-yellow-500/20 text-yellow-400 border-yellow-500/50",
-    cloud: "bg-slate-500/20 text-slate-400 border-slate-500/50",
-    rock: "bg-red-800/20 text-red-400 border-red-500/50",
+    leaf: "bg-orange-500/10 text-orange-400 border-orange-500/30",
+    mist: "bg-blue-500/10 text-blue-400 border-blue-500/30",
+    sand: "bg-yellow-500/10 text-yellow-400 border-yellow-500/30",
+    cloud: "bg-slate-500/10 text-slate-400 border-slate-500/30",
+    rock: "bg-red-800/10 text-red-400 border-red-500/30",
   };
 
   return (
-    <span className={`text-xs px-2 py-0.5 rounded border uppercase tracking-wider font-bold ${colors[village] || colors.leaf}`}>
+    <span className={`text-[8px] px-2 py-0.5 rounded-full border uppercase tracking-[0.15em] font-black ${colors[village] || colors.leaf}`}>
       {village}
     </span>
   );
@@ -115,37 +115,30 @@ export function TaskCard({ task }: TaskCardProps) {
     <NinjaCard 
       village={task.village} 
       character={task.character}
-      className={`transition-all duration-300 relative group/card pt-16 ${task.status === 'completed' ? 'opacity-70 grayscale-[0.5]' : ''}`}
+      className={`transition-all duration-500 relative group/card pt-12 overflow-hidden border-none bg-gradient-to-br from-neutral-900/90 to-neutral-950/90 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.4)] hover:shadow-primary/20 ${task.status === 'completed' ? 'opacity-60 grayscale-[0.3]' : ''}`}
     >
-      {/* Kage Animation Overlay */}
+      {/* Sleek Glassmorphism Header Decoration */}
+      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary/50 to-transparent opacity-30" />
+      
+      {/* Kage Animation Overlay - Repositioned for sleekness */}
       {villageKage && (
         <motion.div 
-          className="absolute top-4 left-4 flex items-center gap-3 z-20 pointer-events-none"
-          initial={{ opacity: 0, x: -10 }}
-          animate={{ opacity: 1, x: 0 }}
-          key={villageKage.id} // Add key for immediate re-animation on switch
-          whileHover={{ scale: 1.05 }}
+          className="absolute top-3 left-4 flex items-center gap-2 z-20 pointer-events-none"
+          initial={{ opacity: 0, y: -5 }}
+          animate={{ opacity: 1, y: 0 }}
+          key={villageKage.id}
         >
           <div className="relative">
             <motion.div 
               animate={{ 
-                scale: [1, 1.15, 1], 
-                opacity: [0.2, 0.5, 0.2],
-                rotate: [0, 5, -5, 0] 
+                scale: [1, 1.2, 1], 
+                opacity: [0.1, 0.3, 0.1],
               }}
-              transition={{ 
-                duration: 4, 
-                repeat: Infinity,
-                ease: "easeInOut" 
-              }}
-              className="absolute inset-0 bg-primary rounded-full blur-lg"
+              transition={{ duration: 4, repeat: Infinity }}
+              className="absolute inset-0 bg-primary rounded-full blur-md"
             />
             <motion.div 
-              className="w-10 h-10 rounded-full border-2 border-primary/50 overflow-hidden bg-neutral-900 relative shadow-[0_0_10px_rgba(var(--primary),0.3)]"
-              animate={{
-                boxShadow: ["0 0 5px rgba(var(--primary), 0.2)", "0 0 15px rgba(var(--primary), 0.5)", "0 0 5px rgba(var(--primary), 0.2)"]
-              }}
-              transition={{ duration: 2, repeat: Infinity }}
+              className="w-8 h-8 rounded-full border border-primary/30 overflow-hidden bg-neutral-900/80 relative"
             >
               <img 
                 src={`/images/characters/${villageKage.id}.png`} 
@@ -155,15 +148,13 @@ export function TaskCard({ task }: TaskCardProps) {
                   e.currentTarget.style.display = 'none';
                 }}
               />
-              {!villageKage.id && <Crown className="w-5 h-5 m-2.5 text-primary" />}
+              {!villageKage.id && <Crown className="w-4 h-4 m-2 text-primary/70" />}
             </motion.div>
           </div>
           <div className="flex flex-col">
-            <span className="text-[7px] text-neutral-500 uppercase font-mono tracking-tighter">Mission Overseer</span>
+            <span className="text-[6px] text-neutral-500 uppercase font-medium tracking-[0.2em] leading-none mb-1">Overseer</span>
             <motion.span 
-              className="text-[9px] font-display text-primary uppercase tracking-tighter leading-none"
-              animate={{ opacity: [1, 0.7, 1] }}
-              transition={{ duration: 3, repeat: Infinity }}
+              className="text-[10px] font-sans font-bold text-primary/80 uppercase tracking-wider leading-none"
             >
               {villageKage.name}
             </motion.span>
@@ -171,10 +162,10 @@ export function TaskCard({ task }: TaskCardProps) {
         </motion.div>
       )}
 
-      {/* Character Image Overlay */}
+      {/* Character Image Overlay - Modern placement */}
       <motion.div 
-        className="absolute top-0 right-0 w-32 h-32 pointer-events-none opacity-40 group-hover/card:opacity-80 transition-opacity"
-        whileHover={{ scale: 1.1, rotate: 5 }}
+        className="absolute -top-4 -right-4 w-40 h-40 pointer-events-none opacity-10 group-hover/card:opacity-30 transition-all duration-700 blur-[2px] group-hover/card:blur-none"
+        whileHover={{ scale: 1.05, x: -10, y: 10 }}
         {...(overseerChar || assignedChar ? kageAnimation : {})}
       >
         <img 
@@ -187,127 +178,128 @@ export function TaskCard({ task }: TaskCardProps) {
         />
       </motion.div>
 
-      <div className="flex justify-between items-start mb-4 relative z-10">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2 flex-wrap">
-            <h3 className={`text-xl font-bold font-display tracking-wide ${task.status === 'completed' ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
+      <div className="flex flex-col gap-4 relative z-10 px-1">
+        <div className="flex justify-between items-start">
+          <div className="space-y-2 max-w-[70%]">
+            <div className="flex flex-wrap gap-1.5 items-center">
+              <VillageBadge village={task.village} />
+              <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20 font-mono uppercase tracking-tighter">
+                {task.priority}
+              </span>
+            </div>
+            
+            <h3 className={`text-2xl font-sans font-black tracking-tight leading-tight ${task.status === 'completed' ? 'line-through text-neutral-500' : 'text-white'}`}>
               {task.title}
             </h3>
-            <div className="flex gap-1 flex-wrap">
-              <VillageBadge village={task.village} />
-              {charData && (
-                <span className="text-[10px] bg-neutral-800 text-neutral-300 px-2 py-0.5 rounded border border-neutral-700 uppercase font-bold font-shinobi">
-                  {charData.name}
-                </span>
-              )}
-              {teamData && (
-                <span className="text-[10px] bg-neutral-800 text-neutral-300 px-2 py-0.5 rounded border border-neutral-700 uppercase font-bold font-shinobi">
-                  {teamData.name}
-                </span>
-              )}
-            </div>
           </div>
-          <div className="flex items-center gap-4 text-sm text-muted-foreground">
-            <div className="flex items-center gap-1">
-              <PriorityIcon priority={task.priority} />
-              <span className="capitalize font-semibold">{task.priority} Rank</span>
-            </div>
-            <div className="flex items-center gap-1 group/happiness cursor-pointer">
-              <span className="text-xs font-bold text-primary/80">{getHappinessIcon(task.happiness || 50)}</span>
-              <span className="font-mono text-[10px]">{task.happiness || 50}% Moral</span>
-            </div>
-            <span>{format(new Date(task.createdAt || new Date()), "MMM d")}</span>
+          
+          <div className="flex gap-2 relative z-20">
+            <Button
+              size="icon"
+              variant="ghost"
+              className={`rounded-xl h-10 w-10 border transition-all duration-300 ${task.status === 'completed' ? 'bg-green-500/20 text-green-400 border-green-500/30' : 'bg-neutral-800/50 border-neutral-700/50 hover:border-primary/50 hover:text-primary'}`}
+              onClick={handleToggleStatus}
+              disabled={updateTask.isPending}
+            >
+              <Check className={`h-5 w-5 ${task.status === 'completed' ? 'scale-110' : ''}`} />
+            </Button>
+            <Button
+              size="icon"
+              variant="ghost"
+              className="text-neutral-500 hover:text-red-400 hover:bg-red-400/10 rounded-xl h-10 w-10 border border-transparent hover:border-red-400/20 transition-all"
+              onClick={() => deleteTask.mutate(task.id)}
+              disabled={deleteTask.isPending}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
           </div>
         </div>
-        
-        <div className="flex gap-2 relative z-20">
-          <Button
-            size="icon"
-            variant={task.status === 'completed' ? "default" : "outline"}
-            className={`rounded-full h-10 w-10 border-2 ${task.status === 'completed' ? 'bg-green-600 hover:bg-green-700 border-green-800' : 'border-neutral-600 hover:border-primary hover:text-primary'}`}
-            onClick={handleToggleStatus}
-            disabled={updateTask.isPending}
-          >
-            <Check className="h-5 w-5" />
-          </Button>
-          <Button
-            size="icon"
-            variant="ghost"
-            className="text-neutral-500 hover:text-destructive hover:bg-destructive/10 rounded-full h-10 w-10"
-            onClick={() => deleteTask.mutate(task.id)}
-            disabled={deleteTask.isPending}
-          >
-            <Trash2 className="h-5 w-5" />
-          </Button>
+
+        <p className="text-neutral-400 text-sm leading-relaxed font-sans font-light line-clamp-2 group-hover/card:line-clamp-none transition-all">
+          {task.description || "Awaiting mission briefing..."}
+        </p>
+
+        <div className="flex items-center gap-4 py-2 border-y border-neutral-800/50">
+           <div className="flex flex-col gap-0.5">
+             <span className="text-[8px] uppercase text-neutral-500 font-bold tracking-widest">Assigned</span>
+             <span className="text-[11px] font-sans font-bold text-neutral-300">{charData?.name || "Unknown Shinobi"}</span>
+           </div>
+           <div className="h-6 w-px bg-neutral-800" />
+           <div className="flex flex-col gap-0.5">
+             <span className="text-[8px] uppercase text-neutral-500 font-bold tracking-widest">Morale</span>
+             <div className="flex items-center gap-1.5">
+               <span className="text-xs">{getHappinessIcon(task.happiness || 50)}</span>
+               <span className="text-[11px] font-mono text-primary font-bold">{task.happiness || 50}%</span>
+             </div>
+           </div>
+           <div className="h-6 w-px bg-neutral-800" />
+           <div className="flex flex-col gap-0.5">
+             <span className="text-[8px] uppercase text-neutral-500 font-bold tracking-widest">Date</span>
+             <span className="text-[11px] font-mono text-neutral-400">{format(new Date(task.createdAt || new Date()), "dd.MM.yy")}</span>
+           </div>
         </div>
-      </div>
 
-      <p className="text-neutral-300 mb-4 leading-relaxed">
-        {task.description || "No mission details provided."}
-      </p>
-
-      {/* Happiness Adjustment Slider */}
-      <div className="mb-4 px-1">
-        <div className="flex justify-between items-center mb-1">
-          <span className="text-[10px] uppercase font-bold text-neutral-500 tracking-tighter font-shinobi">Squad Morale</span>
-          <span className="text-[10px] font-mono text-primary">{task.happiness || 50}%</span>
+        {/* Modern Slider */}
+        <div className="group/slider relative pt-1">
+          <input 
+            type="range" 
+            min="0" 
+            max="100" 
+            className="w-full h-1 bg-neutral-800 rounded-full appearance-none cursor-pointer accent-primary hover:h-1.5 transition-all"
+            value={task.happiness || 50}
+            onChange={(e) => handleHappinessChange(parseInt(e.target.value))}
+          />
         </div>
-        <input 
-          type="range" 
-          min="0" 
-          max="100" 
-          className="w-full h-1 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-primary"
-          value={task.happiness || 50}
-          onChange={(e) => handleHappinessChange(parseInt(e.target.value))}
-        />
-      </div>
 
-      <div className="bg-neutral-900/50 rounded-lg border border-neutral-800 overflow-hidden">
-        <Accordion type="single" collapsible className="w-full">
-          <AccordionItem value="updates" className="border-none">
-            <AccordionTrigger className="px-4 py-2 hover:no-underline hover:bg-neutral-800/50">
-              <div className="flex items-center gap-2 text-sm font-semibold text-neutral-400">
-                <Scroll className="h-4 w-4" />
-                <span>Mission Log ({task.updates.length})</span>
-              </div>
-            </AccordionTrigger>
-            <AccordionContent className="px-4 pb-4 bg-neutral-900/30">
-              <div className="space-y-3 pt-3">
-                <AnimatePresence>
-                  {task.updates.map((update) => (
-                    <motion.div 
-                      key={update.id}
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      className="text-sm bg-neutral-800 p-2 rounded border-l-2 border-primary"
+        <div className="rounded-xl overflow-hidden border border-neutral-800/50 bg-neutral-900/30 backdrop-blur-sm">
+          <Accordion type="single" collapsible className="w-full">
+            <AccordionItem value="updates" className="border-none">
+              <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-neutral-800/30 text-xs font-medium text-neutral-400">
+                <div className="flex items-center gap-2">
+                  <Scroll className="h-3.5 w-3.5 text-primary/60" />
+                  <span>Mission Logs <span className="text-primary/40 ml-1">[{task.updates.length}]</span></span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="px-4 pb-4">
+                <div className="space-y-3 pt-2">
+                  <AnimatePresence>
+                    {task.updates.slice().reverse().map((update) => (
+                      <motion.div 
+                        key={update.id}
+                        initial={{ opacity: 0, y: 5 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="text-[11px] bg-neutral-800/50 p-3 rounded-lg border-l border-primary/30 relative group/log"
+                      >
+                        <p className="text-neutral-300 font-sans leading-snug">{update.content}</p>
+                        <div className="mt-2 flex justify-between items-center opacity-40 group-hover/log:opacity-100 transition-opacity">
+                          <span className="text-[8px] uppercase font-mono">{format(new Date(update.createdAt || new Date()), "HH:mm • MMM d")}</span>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
+                  
+                  <form onSubmit={handleAddUpdate} className="relative mt-4">
+                    <Input 
+                      value={updateText}
+                      onChange={(e) => setUpdateText(e.target.value)}
+                      placeholder="Add intel..." 
+                      className="h-9 text-xs bg-neutral-950/50 border-neutral-800 focus-visible:ring-1 focus-visible:ring-primary/50 rounded-lg pr-10"
+                    />
+                    <Button 
+                      type="submit" 
+                      size="icon" 
+                      variant="ghost"
+                      className="absolute right-1 top-1 h-7 w-7 text-neutral-500 hover:text-primary transition-colors" 
+                      disabled={addUpdate.isPending || !updateText.trim()}
                     >
-                      <p className="text-neutral-200">{update.content}</p>
-                      <span className="text-[10px] text-neutral-500 uppercase font-mono">
-                        {format(new Date(update.createdAt || new Date()), "MMM d • HH:mm")}
-                      </span>
-                    </motion.div>
-                  ))}
-                </AnimatePresence>
-                
-                {task.updates.length === 0 && (
-                  <p className="text-xs text-neutral-600 italic text-center py-2">No updates recorded yet.</p>
-                )}
-
-                <form onSubmit={handleAddUpdate} className="flex gap-2 mt-4 pt-2 border-t border-neutral-800">
-                  <Input 
-                    value={updateText}
-                    onChange={(e) => setUpdateText(e.target.value)}
-                    placeholder="Log a mission update..." 
-                    className="h-8 text-xs bg-neutral-950 border-neutral-800 focus-visible:ring-1 focus-visible:ring-primary"
-                  />
-                  <Button type="submit" size="icon" className="h-8 w-8 bg-neutral-800 hover:bg-primary hover:text-primary-foreground" disabled={addUpdate.isPending || !updateText.trim()}>
-                    <Send className="h-3 w-3" />
-                  </Button>
-                </form>
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
+                      <Send className="h-3.5 w-3.5" />
+                    </Button>
+                  </form>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        </div>
       </div>
     </NinjaCard>
   );
