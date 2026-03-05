@@ -8,6 +8,8 @@ import { useState, useRef, useEffect } from "react";
 const DEFAULT_PLAYLIST = [
   { title: "Hero's Come Back!!", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3", artist: "nobodyknows+" },
   { title: "Blue Bird", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3", artist: "Ikimono-gakari" },
+  { title: "Hidden Leaf Forest", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-16.mp3", artist: "Environment", isEnv: true },
+  { title: "Rainy Amegakure", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-17.mp3", artist: "Environment", isEnv: true },
   { title: "Silhouette", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3", artist: "KANA-BOON" },
   { title: "Sign", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3", artist: "FLOW" },
   { title: "Go!!!", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3", artist: "FLOW" },

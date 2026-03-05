@@ -32,7 +32,10 @@ export function ShinobiMap({ tasks, onVillageClick, activeVillage }: ShinobiMapP
   return (
     <div className="relative w-full aspect-[16/9] bg-neutral-950 rounded-xl border-2 border-primary/30 overflow-hidden shadow-2xl group/map">
       {/* Map Background (Stylized) */}
-      <div className="absolute inset-0 opacity-40 bg-[url('https://www.transparenttextures.com/patterns/old-map.png')]" />
+      <div className={`absolute inset-0 opacity-40 transition-opacity duration-1000 ${activeVillage ? 'opacity-60' : 'opacity-40'} bg-[url('https://www.transparenttextures.com/patterns/old-map.png')]`} />
+      
+      {/* Fog of War Effect */}
+      <div className="absolute inset-0 pointer-events-none bg-black/40 backdrop-blur-[2px] z-0" />
       
       {/* The Forest of Focus */}
       <div className="absolute inset-0 pointer-events-none z-10">

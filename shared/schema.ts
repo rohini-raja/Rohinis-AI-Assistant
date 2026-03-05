@@ -7,14 +7,24 @@ export const tasks = pgTable("tasks", {
   id: serial("id").primaryKey(),
   title: text("title").notNull(),
   description: text("description"),
-  status: text("status", { enum: ["pending", "completed"] }).default("pending").notNull(),
+  status: text("status", { enum: ["pending", "completed", "archived"] }).default("pending").notNull(),
   priority: text("priority", { enum: ["genin", "chunin", "jonin", "kage"] }).default("genin").notNull(),
   village: text("village").default("leaf").notNull(), 
   character: text("character").default("naruto").notNull(),
   team: text("team").default("team7").notNull(),
   happiness: integer("happiness").default(50).notNull(),
+  chakra: integer("chakra").default(100).notNull(),
+  lastChakraUpdate: timestamp("last_chakra_update").defaultNow(),
   createdAt: timestamp("created_at").defaultNow(),
   completedAt: timestamp("completed_at"),
+});
+
+export const userStats = pgTable("user_stats", {
+  id: serial("id").primaryKey(),
+  experience: integer("experience").default(0).notNull(),
+  level: text("level").default("genin").notNull(),
+  unlockedVillages: text("unlocked_villages").array().default(["leaf"]).notNull(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 export const taskUpdates = pgTable("task_updates", {
