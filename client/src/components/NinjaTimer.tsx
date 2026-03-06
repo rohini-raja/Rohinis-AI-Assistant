@@ -73,6 +73,12 @@ export function NinjaTimer() {
     }
   }, []);
 
+  useEffect(() => {
+    const handleToggle = () => setIsActive(prev => !prev);
+    window.addEventListener('toggle-ninja-timer', handleToggle);
+    return () => window.removeEventListener('toggle-ninja-timer', handleToggle);
+  }, []);
+
   const toggleTimer = () => setIsActive(!isActive);
   
   const resetTimer = () => {

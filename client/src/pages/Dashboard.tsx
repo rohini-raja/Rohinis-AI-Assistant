@@ -13,6 +13,8 @@ import { NinjaMelodies } from "@/components/NinjaMelodies";
 import { ShinobiMap } from "@/components/ShinobiMap";
 import { NinjaCalendar } from "@/components/NinjaCalendar";
 
+import { NinjaToolbox } from "@/components/NinjaToolbox";
+
 export default function Dashboard() {
   const { data: tasks, isLoading, error } = useTasks();
   const importData = useImportData();
@@ -133,6 +135,7 @@ export default function Dashboard() {
       </AnimatePresence>
 
       <div className={`transition-all duration-300 ${showTools ? 'lg:pl-80' : 'pl-0'}`}>
+        <NinjaToolbox />
         {/* Header / Hero Section */}
         <header className="relative bg-neutral-900 border-b border-primary/30 overflow-hidden">
           {/* Background Pattern */}
