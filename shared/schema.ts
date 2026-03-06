@@ -14,6 +14,8 @@ export const tasks = pgTable("tasks", {
   team: text("team").default("team7").notNull(),
   happiness: integer("happiness").default(50).notNull(),
   chakra: integer("chakra").default(100).notNull(),
+  isRecurring: boolean("is_recurring").default(false).notNull(),
+  recurringInterval: text("recurring_interval"), // "daily", "weekly", etc.
   lastChakraUpdate: timestamp("last_chakra_update").defaultNow(),
   createdAt: timestamp("created_at").defaultNow(),
   completedAt: timestamp("completed_at"),

@@ -5,8 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Input } from "@/components/ui/input";
 import { format } from "date-fns";
-import { Check, Trash2, ShieldAlert, Shield, ShieldCheck, Crown, Scroll, Send, Heart, HeartOff } from "lucide-react";
-import { useUpdateTask, useDeleteTask, useAddTaskUpdate, SHINOBI_DATA } from "@/hooks/use-tasks";
+import { Check, Trash2, ShieldAlert, Shield, ShieldCheck, Crown, Scroll, Send, Heart, HeartOff, Copy, RefreshCw } from "lucide-react";
+import { useUpdateTask, useDeleteTask, useAddTaskUpdate, useCreateTask, SHINOBI_DATA } from "@/hooks/use-tasks";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -43,6 +43,7 @@ const VillageBadge = ({ village }: { village: string }) => {
 export function TaskCard({ task }: TaskCardProps) {
   const updateTask = useUpdateTask();
   const deleteTask = useDeleteTask();
+  const createTask = useCreateTask();
   const addUpdate = useAddTaskUpdate();
   const [updateText, setUpdateText] = useState("");
   const [currentHokageId, setCurrentHokageId] = useState(localStorage.getItem("ninja-selected-hokage") || "tsunade");
@@ -83,6 +84,22 @@ export function TaskCard({ task }: TaskCardProps) {
       repeat: Infinity,
       ease: "easeInOut"
     }
+  };
+
+  const handleShadowClone = () => {
+    const { id, updates, createdAt, completedAt, ...cloneData } = task;
+    createTask.mutate({
+      ...cloneData,
+      title: `${cloneData.title} (Clone)`,
+    });
+  };
+
+  const handleToggleRecurring = () => {
+    updateTask.mutate({ 
+      id: task.id, 
+      isRecurring: !task.isRecurring,
+      recurringInterval: !task.isRecurring ? "daily" : null 
+    });
   };
 
   const handleToggleStatus = () => {
@@ -194,6 +211,26 @@ export function TaskCard({ task }: TaskCardProps) {
           </div>
           
           <div className="flex gap-2 relative z-20">
+            <Button
+              size="icon"
+              variant="ghost"
+              title="Shadow Clone Jutsu (Duplicate)"
+              className="rounded-xl h-10 w-10 border bg-neutral-800/50 border-neutral-700/50 hover:border-primary/50 hover:text-primary transition-all"
+              onClick={handleShadowClone}
+              disabled={createTask.isPending}
+            >
+              <Copy className="h-4 w-4" />
+            </Button>
+            <Button
+              size="icon"
+              variant="ghost"
+              title={task.isRecurring ? "Unsummon Recurring" : "Summoning Jutsu (Recurring)"}
+              className={`rounded-xl h-10 w-10 border transition-all ${task.isRecurring ? 'bg-primary/20 text-primary border-primary/40' : 'bg-neutral-800/50 border-neutral-700/50 hover:border-primary/50 hover:text-primary'}`}
+              onClick={handleToggleRecurring}
+              disabled={updateTask.isPending}
+            >
+              <RefreshCw className={`h-4 w-4 ${task.isRecurring ? 'animate-spin-slow' : ''}`} />
+            </Button>
             <Button
               size="icon"
               variant="ghost"
