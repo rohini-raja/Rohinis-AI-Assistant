@@ -43,7 +43,13 @@ export const quickNotes = pgTable("quick_notes", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-export const insertTaskSchema = createInsertSchema(tasks).omit({ id: true, createdAt: true, completedAt: true });
+export const insertTaskSchema = createInsertSchema(tasks).omit({ 
+  id: true, 
+  createdAt: true, 
+  completedAt: true,
+  chakra: true,
+  lastChakraUpdate: true
+});
 export const insertTaskUpdateSchema = createInsertSchema(taskUpdates).omit({ id: true, createdAt: true });
 export const insertQuickNoteSchema = createInsertSchema(quickNotes).omit({ id: true, createdAt: true });
 

@@ -134,6 +134,28 @@ export function TaskCard({ task }: TaskCardProps) {
       character={task.character}
       className={`transition-all duration-500 relative group/card pt-12 overflow-hidden border-none bg-gradient-to-br from-neutral-900/90 to-neutral-950/90 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.4)] hover:shadow-primary/20 ${task.status === 'completed' ? 'opacity-60 grayscale-[0.3]' : ''}`}
     >
+      {/* Dynamic Chakra Flow Animation on Completion */}
+      <AnimatePresence>
+        {task.status === 'completed' && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="absolute inset-0 z-0 pointer-events-none"
+          >
+            <motion.div 
+              animate={{ 
+                scale: [1, 1.2, 1],
+                opacity: [0.1, 0.3, 0.1],
+                rotate: [0, 90, 180, 270, 360]
+              }}
+              transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+              className="absolute inset-[-50%] bg-[conic-gradient(from_0deg,transparent,var(--primary),transparent)] opacity-20 blur-3xl"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-primary/10 to-transparent" />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Sleek Glassmorphism Header Decoration */}
       <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary/50 to-transparent opacity-30" />
       

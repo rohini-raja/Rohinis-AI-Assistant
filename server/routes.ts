@@ -43,10 +43,25 @@ export async function registerRoutes(
   app.patch(api.tasks.update.path, async (req, res) => {
     try {
       const input = api.tasks.update.input.parse(req.body);
-      const task = await storage.updateTask(Number(req.params.id), input);
+      const id = Number(req.params.id);
+      const existingTask = await storage.getTask(id);
+      
+      const task = await storage.updateTask(id, input);
       if (!task) {
         return res.status(404).json({ message: 'Task not found' });
       }
+
+      // Summoning Jutsu Logic: If recurring and just completed, summon a new clone
+      if (input.status === 'completed' && task.isRecurring && existingTask?.status === 'pending') {
+        const { id: _, updates: __, createdAt: ___, completedAt: ____, ...cloneData } = task;
+        await storage.createTask({
+          ...cloneData,
+          status: 'pending',
+          chakra: 100,
+          lastChakraUpdate: new Date()
+        });
+      }
+
       res.json(task);
     } catch (err) {
       if (err instanceof z.ZodError) {
