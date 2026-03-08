@@ -248,11 +248,11 @@ export function TaskCard({ task }: TaskCardProps) {
       <motion.div 
         className="absolute -top-4 -right-4 w-40 h-40 pointer-events-none opacity-10 group-hover/card:opacity-30 transition-all duration-700 blur-[2px] group-hover/card:blur-none"
         whileHover={{ scale: 1.05, x: -10, y: 10 }}
-        {...(overseerChar || assignedChar ? kageAnimation : {})}
+        {...(assignedChar ? kageAnimation : {})}
       >
         <img 
-          src={`/images/characters/${getCharacterImageId(overseerChar?.id || task.character)}.png`} 
-          alt={overseerChar?.id || task.character}
+          src={`/images/characters/${getCharacterImageId(task.character)}.png`} 
+          alt={task.character}
           className="w-full h-full object-contain"
           onError={(e) => { e.currentTarget.style.display = 'none'; }}
         />

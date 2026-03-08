@@ -60,6 +60,8 @@ Five tables:
 - `DELETE /api/notes/:id` — Delete note
 - `GET /api/stats` — Get user stats (XP, rank, streaks)
 - `GET /api/achievements` — List all achievements with unlock status
+- `GET /api/music/search?q=...` — Search songs via Deezer API (returns 30s previews)
+- `GET /api/music/playlist/:name` — Fetch curated playlists (naruto_openings, naruto_endings, naruto_ost, naruto_lofi)
 
 ### Key Features
 1. **XP/Leveling System**: Earn XP per task completion (10/25/50/100 by priority). Ranks: Academy Student → Genin → Chunin → Jonin → ANBU → Kage
@@ -76,7 +78,7 @@ Five tables:
 12. **Summoning Jutsu**: Toggle recurring on any task; completing a recurring task auto-creates a new pending copy
 13. **Hokage Overseer**: Selectable Hokage shown on Leaf Village task cards
 14. **Settings Panel**: Theme, font, Hokage selection, accent color (village presets + custom color wheel)
-15. **Sidebar Tools**: NinjaQuickStats, Achievements, Timer (Sage Mode), Calendar, Quick Notes, Music Player
+15. **Sidebar Tools**: NinjaQuickStats, Achievements, Timer (Sage Mode with presets), Calendar, Quick Notes, Music Player (Deezer-powered)
 
 ### Key Design Decisions
 1. **Shared schema and routes**: `shared/` directory ensures type safety across full stack

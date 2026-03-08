@@ -1,52 +1,26 @@
 import { Card } from "@/components/ui/card";
-import { Music, Play, Pause, SkipForward, SkipBack, Volume2, Search, Loader2, Shuffle, Repeat, VolumeX, ListMusic } from "lucide-react";
+import { Music, Play, Pause, SkipForward, SkipBack, Volume2, Search, Loader2, Shuffle, Repeat, VolumeX, ListMusic, Disc } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState, useRef, useEffect, useCallback } from "react";
 
-type TrackCategory = "all" | "openings" | "lofi" | "ambient";
+type PlaylistTab = "openings" | "endings" | "ost" | "lofi";
 
-interface Track {
+interface DeezerTrack {
+  id: number;
   title: string;
-  url: string;
   artist: string;
-  category: "openings" | "lofi" | "ambient";
+  preview: string;
+  album: string;
+  cover: string;
+  duration: number;
 }
 
-const PLAYLIST: Track[] = [
-  { title: "Hero's Come Back!!", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3", artist: "nobodyknows+", category: "openings" },
-  { title: "Blue Bird", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3", artist: "Ikimono-gakari", category: "openings" },
-  { title: "Silhouette", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3", artist: "KANA-BOON", category: "openings" },
-  { title: "Sign", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3", artist: "FLOW", category: "openings" },
-  { title: "Go!!!", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3", artist: "FLOW", category: "openings" },
-  { title: "Haruka Kanata", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3", artist: "ASIAN KUNG-FU GENERATION", category: "openings" },
-  { title: "Rocks", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3", artist: "Hound Dog", category: "openings" },
-  { title: "Closer", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3", artist: "Joe Inoue", category: "openings" },
-  { title: "Hotaru no Hikari", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-9.mp3", artist: "Ikimono-gakari", category: "openings" },
-  { title: "Toubi", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-10.mp3", artist: "7!! Seven Oops", category: "openings" },
-  { title: "Distance", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-11.mp3", artist: "LONG SHOT PARTY", category: "openings" },
-  { title: "Diver", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-12.mp3", artist: "NICO Touches the Walls", category: "openings" },
-  { title: "Guren (Lofi)", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-13.mp3", artist: "Shinobi Beats", category: "lofi" },
-  { title: "Samidare (Lofi)", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-14.mp3", artist: "Hidden Leaf", category: "lofi" },
-  { title: "Loneliness (Lofi)", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-15.mp3", artist: "Ninja Vibes", category: "lofi" },
-  { title: "Decision (Lofi)", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-16.mp3", artist: "Shinobi Chill", category: "lofi" },
-  { title: "Man of the World (Lofi)", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-17.mp3", artist: "Leaf Village", category: "lofi" },
-  { title: "Sadness & Sorrow (Lofi)", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3", artist: "Ninja Vibes", category: "lofi" },
-  { title: "Afternoon of Konoha (Lofi)", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3", artist: "Leaf Village", category: "lofi" },
-  { title: "Gentle Hands (Lofi)", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3", artist: "Shinobi Beats", category: "lofi" },
-  { title: "Hidden Leaf Forest", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3", artist: "Nature Sounds", category: "ambient" },
-  { title: "Rainy Amegakure", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3", artist: "Nature Sounds", category: "ambient" },
-  { title: "Wind Country Breeze", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3", artist: "Nature Sounds", category: "ambient" },
-  { title: "Waterfall of Truth", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-9.mp3", artist: "Nature Sounds", category: "ambient" },
-  { title: "Mount Myoboku Night", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-10.mp3", artist: "Nature Sounds", category: "ambient" },
-  { title: "Ocean of Land of Waves", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-11.mp3", artist: "Nature Sounds", category: "ambient" },
-];
-
-const CATEGORY_LABELS: Record<TrackCategory, string> = {
-  all: "All",
+const TAB_LABELS: Record<PlaylistTab, string> = {
   openings: "Openings",
+  endings: "Endings",
+  ost: "OST",
   lofi: "Lofi",
-  ambient: "Ambient",
 };
 
 function formatTime(sec: number) {
@@ -57,19 +31,44 @@ function formatTime(sec: number) {
 
 export function NinjaMelodies() {
   const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
+  const [currentTrack, setCurrentTrack] = useState<DeezerTrack | null>(null);
+  const [playlist, setPlaylist] = useState<DeezerTrack[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<DeezerTrack[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [isLoadingPlaylist, setIsLoadingPlaylist] = useState(true);
+  const [activeTab, setActiveTab] = useState<PlaylistTab>("openings");
   const [volume, setVolume] = useState(() => parseFloat(localStorage.getItem("ninja-volume") || "0.7"));
   const [isMuted, setIsMuted] = useState(false);
   const [shuffle, setShuffle] = useState(false);
   const [repeat, setRepeat] = useState<"off" | "all" | "one">("off");
-  const [category, setCategory] = useState<TrackCategory>("all");
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [showSearch, setShowSearch] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const progressRef = useRef<HTMLDivElement>(null);
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const currentTrack = PLAYLIST[currentTrackIndex];
+  const loadPlaylist = useCallback(async (tab: PlaylistTab) => {
+    setIsLoadingPlaylist(true);
+    try {
+      const res = await fetch(`/api/music/playlist/naruto_${tab}`);
+      const data = await res.json();
+      if (data.data && data.data.length > 0) {
+        setPlaylist(data.data);
+        if (!currentTrack) {
+          setCurrentTrack(data.data[0]);
+        }
+      }
+    } catch (err) {
+      console.error("Failed to load playlist:", err);
+    }
+    setIsLoadingPlaylist(false);
+  }, [currentTrack]);
+
+  useEffect(() => {
+    loadPlaylist(activeTab);
+  }, [activeTab]);
 
   useEffect(() => {
     if (audioRef.current) {
@@ -82,6 +81,15 @@ export function NinjaMelodies() {
   }, [volume]);
 
   useEffect(() => {
+    if (audioRef.current && currentTrack) {
+      audioRef.current.src = currentTrack.preview;
+      if (isPlaying) {
+        audioRef.current.play().catch(() => setIsPlaying(false));
+      }
+    }
+  }, [currentTrack]);
+
+  useEffect(() => {
     if (audioRef.current) {
       if (isPlaying) {
         audioRef.current.play().catch(() => setIsPlaying(false));
@@ -89,18 +97,43 @@ export function NinjaMelodies() {
         audioRef.current.pause();
       }
     }
-  }, [isPlaying, currentTrackIndex]);
+  }, [isPlaying]);
+
+  const searchMusic = useCallback(async (query: string) => {
+    if (!query.trim()) {
+      setSearchResults([]);
+      setIsSearching(false);
+      return;
+    }
+    setIsSearching(true);
+    try {
+      const res = await fetch(`/api/music/search?q=${encodeURIComponent(query)}`);
+      const data = await res.json();
+      setSearchResults(data.data || []);
+    } catch (err) {
+      console.error("Search failed:", err);
+    }
+    setIsSearching(false);
+  }, []);
+
+  const handleSearchInput = (value: string) => {
+    setSearchQuery(value);
+    if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+    searchTimeoutRef.current = setTimeout(() => searchMusic(value), 400);
+  };
+
+  const currentIndex = playlist.findIndex(t => t.id === currentTrack?.id);
 
   const getNextIndex = useCallback(() => {
     if (shuffle) {
-      let next = Math.floor(Math.random() * PLAYLIST.length);
-      while (next === currentTrackIndex && PLAYLIST.length > 1) {
-        next = Math.floor(Math.random() * PLAYLIST.length);
+      let next = Math.floor(Math.random() * playlist.length);
+      while (next === currentIndex && playlist.length > 1) {
+        next = Math.floor(Math.random() * playlist.length);
       }
       return next;
     }
-    return (currentTrackIndex + 1) % PLAYLIST.length;
-  }, [shuffle, currentTrackIndex]);
+    return (currentIndex + 1) % playlist.length;
+  }, [shuffle, currentIndex, playlist.length]);
 
   const handleTrackEnd = useCallback(() => {
     if (repeat === "one") {
@@ -108,22 +141,36 @@ export function NinjaMelodies() {
         audioRef.current.currentTime = 0;
         audioRef.current.play().catch(() => {});
       }
-    } else if (repeat === "all" || currentTrackIndex < PLAYLIST.length - 1 || shuffle) {
-      setCurrentTrackIndex(getNextIndex());
+    } else if (playlist.length > 0 && (repeat === "all" || currentIndex < playlist.length - 1 || shuffle)) {
+      const nextIdx = getNextIndex();
+      setCurrentTrack(playlist[nextIdx]);
     } else {
       setIsPlaying(false);
     }
-  }, [repeat, currentTrackIndex, shuffle, getNextIndex]);
+  }, [repeat, currentIndex, shuffle, getNextIndex, playlist]);
 
-  const togglePlay = () => setIsPlaying(!isPlaying);
-  
-  const nextTrack = () => setCurrentTrackIndex(getNextIndex());
+  const togglePlay = () => {
+    if (!currentTrack && playlist.length > 0) {
+      setCurrentTrack(playlist[0]);
+    }
+    setIsPlaying(!isPlaying);
+  };
+
+  const nextTrack = () => {
+    if (playlist.length === 0) return;
+    const nextIdx = getNextIndex();
+    setCurrentTrack(playlist[nextIdx]);
+    setIsPlaying(true);
+  };
 
   const prevTrack = () => {
+    if (playlist.length === 0) return;
     if (audioRef.current && audioRef.current.currentTime > 3) {
       audioRef.current.currentTime = 0;
     } else {
-      setCurrentTrackIndex((prev) => (prev - 1 + PLAYLIST.length) % PLAYLIST.length);
+      const prevIdx = (currentIndex - 1 + playlist.length) % playlist.length;
+      setCurrentTrack(playlist[prevIdx]);
+      setIsPlaying(true);
     }
   };
 
@@ -151,20 +198,19 @@ export function NinjaMelodies() {
     setRepeat(prev => prev === "off" ? "all" : prev === "all" ? "one" : "off");
   };
 
-  const filteredPlaylist = PLAYLIST.filter(t => {
-    const matchesSearch = t.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      t.artist.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = category === "all" || t.category === category;
-    return matchesSearch && matchesCategory;
-  });
-
-  const selectTrack = (track: Track) => {
-    const originalIndex = PLAYLIST.findIndex(t => t.url === track.url && t.title === track.title);
-    setCurrentTrackIndex(originalIndex);
+  const selectTrack = (track: DeezerTrack) => {
+    if (!playlist.find(t => t.id === track.id)) {
+      setPlaylist(prev => [track, ...prev]);
+    }
+    setCurrentTrack(track);
     setIsPlaying(true);
+    setShowSearch(false);
+    setSearchQuery("");
+    setSearchResults([]);
   };
 
   const progressPercent = duration > 0 ? (currentTime / duration) * 100 : 0;
+  const displayList = showSearch && searchQuery ? searchResults : playlist;
 
   return (
     <Card className="p-4 bg-neutral-900 border-primary/30 shadow-lg">
@@ -174,66 +220,72 @@ export function NinjaMelodies() {
       </h3>
 
       <div className="flex gap-1 mb-3">
-        {(Object.keys(CATEGORY_LABELS) as TrackCategory[]).map((cat) => (
+        {(Object.keys(TAB_LABELS) as PlaylistTab[]).map((tab) => (
           <Button
-            key={cat}
+            key={tab}
             size="sm"
-            variant={category === cat ? "default" : "outline"}
-            onClick={() => setCategory(cat)}
+            variant={activeTab === tab && !showSearch ? "default" : "outline"}
+            onClick={() => { setActiveTab(tab); setShowSearch(false); setSearchQuery(""); setSearchResults([]); }}
             className="text-[9px] h-6 px-2 flex-1"
-            data-testid={`music-category-${cat}`}
+            data-testid={`music-tab-${tab}`}
           >
-            {CATEGORY_LABELS[cat]}
+            {TAB_LABELS[tab]}
           </Button>
         ))}
+        <Button
+          size="sm"
+          variant={showSearch ? "default" : "outline"}
+          onClick={() => setShowSearch(!showSearch)}
+          className="text-[9px] h-6 px-2"
+          data-testid="music-search-toggle"
+        >
+          <Search className="h-3 w-3" />
+        </Button>
       </div>
 
-      <div className="relative mb-3">
-        <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-neutral-500" />
-        <Input 
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Search tracks..."
-          className="h-7 pl-7 bg-neutral-950 border-neutral-800 text-[10px] focus:border-primary"
-          data-testid="music-search"
-        />
-      </div>
-      
+      {showSearch && (
+        <div className="relative mb-3">
+          <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-neutral-500" />
+          <Input
+            value={searchQuery}
+            onChange={(e) => handleSearchInput(e.target.value)}
+            placeholder="Search any song..."
+            className="h-7 pl-7 bg-neutral-950 border-neutral-800 text-[10px] focus:border-primary"
+            data-testid="music-search"
+            autoFocus
+          />
+        </div>
+      )}
+
       <div className="flex flex-col items-center gap-3">
-        <audio 
-          ref={audioRef} 
-          src={currentTrack.url}
+        <audio
+          ref={audioRef}
           onEnded={handleTrackEnd}
           onTimeUpdate={handleTimeUpdate}
           onLoadedMetadata={handleLoadedMetadata}
         />
-        
-        <div className="w-full h-20 bg-neutral-950 rounded border border-neutral-800 flex items-center justify-center relative overflow-hidden">
+
+        <div className="w-full h-20 bg-neutral-950 rounded border border-neutral-800 flex items-center relative overflow-hidden">
           <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]" />
-          {isPlaying && (
-            <div className="absolute bottom-0 left-0 right-0 flex items-end justify-center gap-[2px] h-8 px-4">
-              {Array.from({ length: 20 }).map((_, i) => (
-                <div
-                  key={i}
-                  className="w-1 bg-primary/40 rounded-t animate-pulse"
-                  style={{
-                    height: `${Math.random() * 100}%`,
-                    animationDelay: `${i * 0.1}s`,
-                    animationDuration: `${0.5 + Math.random() * 0.5}s`,
-                  }}
-                />
-              ))}
+          {currentTrack?.cover && (
+            <div className="w-20 h-20 shrink-0 relative">
+              <img src={currentTrack.cover} alt="" className="w-full h-full object-cover" />
+              {isPlaying && (
+                <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                  <Disc className="h-6 w-6 text-primary animate-spin" style={{ animationDuration: '3s' }} />
+                </div>
+              )}
             </div>
           )}
-          <div className="text-center z-10 px-3">
+          <div className="flex-1 min-w-0 px-3 z-10">
             <p className="text-[10px] text-primary font-bold truncate uppercase">
               {isPlaying ? 'CHAKRA FLOWING...' : 'RESTING...'}
             </p>
-            <p className="text-[11px] text-white mt-1 uppercase font-bold truncate" data-testid="music-current-title">
-              {currentTrack.title}
+            <p className="text-[11px] text-white mt-0.5 font-bold truncate" data-testid="music-current-title">
+              {currentTrack?.title || "Select a track"}
             </p>
-            <p className="text-[9px] text-neutral-500 uppercase truncate" data-testid="music-current-artist">
-              {currentTrack.artist}
+            <p className="text-[9px] text-neutral-500 truncate" data-testid="music-current-artist">
+              {currentTrack?.artist || ""}
             </p>
           </div>
         </div>
@@ -245,7 +297,7 @@ export function NinjaMelodies() {
             onClick={handleProgressClick}
             data-testid="music-progress"
           >
-            <div 
+            <div
               className="h-full bg-primary rounded-full transition-[width] duration-200 group-hover:bg-primary/80"
               style={{ width: `${progressPercent}%` }}
             />
@@ -257,10 +309,10 @@ export function NinjaMelodies() {
         </div>
 
         <div className="flex items-center gap-2 w-full justify-center">
-          <Button 
-            size="icon" 
-            variant="ghost" 
-            className={`h-7 w-7 ${shuffle ? 'text-primary' : 'text-neutral-500'}`} 
+          <Button
+            size="icon"
+            variant="ghost"
+            className={`h-7 w-7 ${shuffle ? 'text-primary' : 'text-neutral-500'}`}
             onClick={() => setShuffle(!shuffle)}
             data-testid="music-shuffle"
           >
@@ -269,8 +321,8 @@ export function NinjaMelodies() {
           <Button size="icon" variant="ghost" className="text-neutral-400 h-8 w-8" onClick={prevTrack} data-testid="music-prev">
             <SkipBack className="h-4 w-4" />
           </Button>
-          <Button 
-            size="icon" 
+          <Button
+            size="icon"
             onClick={togglePlay}
             className="bg-primary text-primary-foreground h-10 w-10 rounded-full shadow-[0_0_15px_rgba(255,100,0,0.3)]"
             data-testid="music-play"
@@ -280,10 +332,10 @@ export function NinjaMelodies() {
           <Button size="icon" variant="ghost" className="text-neutral-400 h-8 w-8" onClick={nextTrack} data-testid="music-next">
             <SkipForward className="h-4 w-4" />
           </Button>
-          <Button 
-            size="icon" 
-            variant="ghost" 
-            className={`h-7 w-7 ${repeat !== 'off' ? 'text-primary' : 'text-neutral-500'}`} 
+          <Button
+            size="icon"
+            variant="ghost"
+            className={`h-7 w-7 ${repeat !== 'off' ? 'text-primary' : 'text-neutral-500'}`}
             onClick={cycleRepeat}
             data-testid="music-repeat"
           >
@@ -295,9 +347,9 @@ export function NinjaMelodies() {
         </div>
 
         <div className="w-full flex items-center gap-2 px-1">
-          <Button 
-            size="icon" 
-            variant="ghost" 
+          <Button
+            size="icon"
+            variant="ghost"
             className="h-6 w-6 text-neutral-500 hover:text-white shrink-0"
             onClick={() => setIsMuted(!isMuted)}
             data-testid="music-mute"
@@ -324,30 +376,39 @@ export function NinjaMelodies() {
           <div className="flex items-center justify-between mb-1">
             <span className="text-[9px] text-neutral-500 flex items-center gap-1">
               <ListMusic className="h-3 w-3" />
-              {filteredPlaylist.length} tracks
+              {showSearch && searchQuery ? `${searchResults.length} results` : `${playlist.length} tracks`}
             </span>
+            {showSearch && searchQuery && isSearching && (
+              <Loader2 className="h-3 w-3 animate-spin text-primary" />
+            )}
           </div>
           <div className="max-h-36 overflow-y-auto custom-scrollbar space-y-0.5">
-            {filteredPlaylist.map((track) => (
-              <button
-                key={`${track.title}-${track.artist}`}
-                onClick={() => selectTrack(track)}
-                className={`w-full text-left px-2 py-1.5 rounded text-[9px] transition-colors flex items-center justify-between group ${currentTrack.url === track.url && currentTrack.title === track.title ? 'bg-primary/20 text-primary' : 'hover:bg-neutral-800 text-neutral-400'}`}
-                data-testid={`music-track-${track.title.replace(/\s+/g, '-').toLowerCase()}`}
-              >
-                <div className="truncate pr-2 flex-1">
-                  <p className="font-bold truncate">{track.title}</p>
-                  <p className="opacity-60 truncate">{track.artist}</p>
-                </div>
-                <div className="flex items-center gap-1 shrink-0">
-                  <span className="text-[7px] px-1 py-0.5 rounded bg-neutral-800 text-neutral-500 uppercase">{track.category}</span>
-                  {currentTrack.url === track.url && currentTrack.title === track.title && isPlaying && <Loader2 className="h-3 w-3 animate-spin" />}
-                </div>
-              </button>
-            ))}
-            {filteredPlaylist.length === 0 && (
-              <p className="text-[9px] text-neutral-600 text-center py-4">No tracks found</p>
-            )}
+            {isLoadingPlaylist && !showSearch ? (
+              <div className="flex items-center justify-center py-6">
+                <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                <span className="text-[9px] text-neutral-500 ml-2">Loading tracks...</span>
+              </div>
+            ) : displayList.length > 0 ? (
+              displayList.map((track) => (
+                <button
+                  key={track.id}
+                  onClick={() => selectTrack(track)}
+                  className={`w-full text-left px-2 py-1.5 rounded text-[9px] transition-colors flex items-center gap-2 group ${currentTrack?.id === track.id ? 'bg-primary/20 text-primary' : 'hover:bg-neutral-800 text-neutral-400'}`}
+                  data-testid={`music-track-${track.id}`}
+                >
+                  {track.cover && (
+                    <img src={track.cover} alt="" className="w-7 h-7 rounded shrink-0 object-cover" />
+                  )}
+                  <div className="truncate flex-1 min-w-0">
+                    <p className="font-bold truncate">{track.title}</p>
+                    <p className="opacity-60 truncate">{track.artist}</p>
+                  </div>
+                  {currentTrack?.id === track.id && isPlaying && <Loader2 className="h-3 w-3 animate-spin shrink-0" />}
+                </button>
+              ))
+            ) : showSearch && searchQuery && !isSearching ? (
+              <p className="text-[9px] text-neutral-600 text-center py-4">No results found</p>
+            ) : null}
           </div>
         </div>
       </div>

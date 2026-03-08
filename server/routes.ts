@@ -253,6 +253,57 @@ export async function registerRoutes(
     res.json(allDefs);
   });
 
+  app.get("/api/music/search", async (req, res) => {
+    try {
+      const query = (req.query.q as string) || "";
+      if (!query.trim()) {
+        return res.json({ data: [] });
+      }
+      const response = await fetch(`https://api.deezer.com/search?q=${encodeURIComponent(query)}&limit=25`);
+      const data = await response.json();
+      const tracks = (data.data || []).map((t: any) => ({
+        id: t.id,
+        title: t.title_short || t.title,
+        artist: t.artist?.name || "Unknown",
+        preview: t.preview,
+        album: t.album?.title || "",
+        cover: t.album?.cover_medium || "",
+        duration: t.duration || 0,
+      }));
+      res.json({ data: tracks });
+    } catch (err) {
+      console.error("Deezer search error:", err);
+      res.status(500).json({ data: [], error: "Failed to search music" });
+    }
+  });
+
+  app.get("/api/music/playlist/:name", async (req, res) => {
+    try {
+      const playlists: Record<string, string> = {
+        naruto_openings: "naruto opening",
+        naruto_endings: "naruto ending",
+        naruto_ost: "naruto soundtrack ost",
+        naruto_lofi: "naruto lofi",
+      };
+      const query = playlists[req.params.name] || "naruto";
+      const response = await fetch(`https://api.deezer.com/search?q=${encodeURIComponent(query)}&limit=25`);
+      const data = await response.json();
+      const tracks = (data.data || []).map((t: any) => ({
+        id: t.id,
+        title: t.title_short || t.title,
+        artist: t.artist?.name || "Unknown",
+        preview: t.preview,
+        album: t.album?.title || "",
+        cover: t.album?.cover_medium || "",
+        duration: t.duration || 0,
+      }));
+      res.json({ data: tracks });
+    } catch (err) {
+      console.error("Deezer playlist error:", err);
+      res.status(500).json({ data: [], error: "Failed to fetch playlist" });
+    }
+  });
+
   return httpServer;
 }
 
