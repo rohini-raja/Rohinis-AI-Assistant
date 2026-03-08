@@ -15,6 +15,18 @@ interface TaskCardProps {
   task: TaskWithUpdates;
 }
 
+const CHARACTER_IMAGE_MAP: Record<string, string> = {
+  kakashi_hokage: "kakashi",
+  hashirama: "hashirama",
+  tobirama: "tobirama",
+  hiruzen: "hiruzen",
+  minato: "minato",
+};
+
+function getCharacterImageId(id: string): string {
+  return CHARACTER_IMAGE_MAP[id] || id;
+}
+
 const PriorityIcon = ({ priority }: { priority: string }) => {
   switch (priority) {
     case 'genin': return <Shield className="h-4 w-4 text-green-500" />;
@@ -217,7 +229,7 @@ export function TaskCard({ task }: TaskCardProps) {
             />
             <motion.div className="w-8 h-8 rounded-full border border-primary/30 overflow-hidden bg-neutral-900/80 relative">
               <img 
-                src={`/images/characters/${villageKage.id}.png`} 
+                src={`/images/characters/${getCharacterImageId(villageKage.id)}.png`} 
                 alt={villageKage.name}
                 className="w-full h-full object-cover"
                 onError={(e) => { e.currentTarget.style.display = 'none'; }}
@@ -239,7 +251,7 @@ export function TaskCard({ task }: TaskCardProps) {
         {...(overseerChar || assignedChar ? kageAnimation : {})}
       >
         <img 
-          src={`/images/characters/${overseerChar?.id || task.character}.png`} 
+          src={`/images/characters/${getCharacterImageId(overseerChar?.id || task.character)}.png`} 
           alt={overseerChar?.id || task.character}
           className="w-full h-full object-contain"
           onError={(e) => { e.currentTarget.style.display = 'none'; }}
