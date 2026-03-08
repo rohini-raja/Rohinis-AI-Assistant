@@ -1,28 +1,48 @@
 
 import { db } from "./db";
-import { tasks, taskUpdates, quickNotes, type Task, type InsertTask, type TaskUpdate, type InsertTaskUpdate, type QuickNote, type InsertQuickNote } from "@shared/schema";
+import { tasks, taskUpdates, quickNotes, userStats, achievements, type Task, type InsertTask, type TaskUpdate, type InsertTaskUpdate, type QuickNote, type InsertQuickNote, type UserStats, type Achievement } from "@shared/schema";
 import { eq, desc } from "drizzle-orm";
 
 export interface IStorage {
-  // Tasks
   getTasks(): Promise<(Task & { updates: TaskUpdate[] })[]>;
   getTask(id: number): Promise<(Task & { updates: TaskUpdate[] }) | undefined>;
   createTask(task: InsertTask): Promise<Task>;
   updateTask(id: number, updates: Partial<InsertTask>): Promise<Task | undefined>;
   deleteTask(id: number): Promise<void>;
-
-  // Updates
   createTaskUpdate(update: InsertTaskUpdate): Promise<TaskUpdate>;
   getTaskUpdates(taskId: number): Promise<TaskUpdate[]>;
-
-  // Quick Notes
   getQuickNotes(): Promise<QuickNote[]>;
   createQuickNote(note: InsertQuickNote): Promise<QuickNote>;
   updateQuickNote(id: number, completed: boolean): Promise<QuickNote | undefined>;
   deleteQuickNote(id: number): Promise<void>;
-
-  // Import/Export
   importData(data: { tasks: Task[], updates: TaskUpdate[] }): Promise<void>;
+  getStats(): Promise<UserStats>;
+  updateStats(updates: Partial<UserStats>): Promise<UserStats>;
+  getAchievements(): Promise<Achievement[]>;
+  unlockAchievement(key: string, title: string, description: string, icon: string): Promise<Achievement | null>;
+}
+
+const XP_TABLE: Record<string, number> = {
+  genin: 10,
+  chunin: 25,
+  jonin: 50,
+  kage: 100,
+};
+
+const RANK_THRESHOLDS = [
+  { rank: "kage", xp: 5000 },
+  { rank: "anbu", xp: 3000 },
+  { rank: "jonin", xp: 1500 },
+  { rank: "chunin", xp: 500 },
+  { rank: "genin", xp: 100 },
+  { rank: "academy", xp: 0 },
+];
+
+export function getRankForXp(xp: number): string {
+  for (const t of RANK_THRESHOLDS) {
+    if (xp >= t.xp) return t.rank;
+  }
+  return "academy";
 }
 
 export class DatabaseStorage implements IStorage {
@@ -95,6 +115,32 @@ export class DatabaseStorage implements IStorage {
     if (data.updates.length > 0) {
       await db.insert(taskUpdates).values(data.updates);
     }
+  }
+
+  async getStats(): Promise<UserStats> {
+    const rows = await db.select().from(userStats);
+    if (rows.length === 0) {
+      const [newStats] = await db.insert(userStats).values({}).returning();
+      return newStats;
+    }
+    return rows[0];
+  }
+
+  async updateStats(updates: Partial<UserStats>): Promise<UserStats> {
+    const current = await this.getStats();
+    const [updated] = await db.update(userStats).set(updates).where(eq(userStats.id, current.id)).returning();
+    return updated;
+  }
+
+  async getAchievements(): Promise<Achievement[]> {
+    return db.select().from(achievements).orderBy(desc(achievements.unlockedAt));
+  }
+
+  async unlockAchievement(key: string, title: string, description: string, icon: string): Promise<Achievement | null> {
+    const existing = await db.select().from(achievements).where(eq(achievements.key, key));
+    if (existing.length > 0) return null;
+    const [newAchievement] = await db.insert(achievements).values({ key, title, description, icon }).returning();
+    return newAchievement;
   }
 }
 

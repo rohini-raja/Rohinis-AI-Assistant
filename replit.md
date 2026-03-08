@@ -2,22 +2,25 @@
 
 ## Overview
 
-This is a **Naruto-themed task management application** (called "Ninja Mission Log"). Users create, track, and manage tasks styled as ninja missions, with Naruto universe theming including villages, characters, teams, and ninja rank-based priorities (genin, chunin, jonin, kage). The app supports task updates/comments, import/export via JSON files, and filtering by status.
+This is a **Naruto-themed task management application** (called "Ninja Tasks"). Users create, track, and manage tasks styled as ninja missions, with Naruto universe theming including villages, characters, teams, and ninja rank-based priorities (genin, chunin, jonin, kage). The app features XP/leveling, achievements, analytics, sound effects, mission templates, and extensive customization.
 
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
+- **CRITICAL**: User explicitly rejected DiceBear/cartoon avatars. Character images MUST use `/images/characters/${id}.png` with `onError={(e) => e.currentTarget.style.display='none'` (no fallback). Available local images: gaara, itachi, jiraiya, kakashi, madara, naruto, pain, sakura, sasuke, tsunade.
+- Custom event `hokage-changed` dispatched from App.tsx useEffect, listened in TaskCard.tsx for instant updates.
 
 ## System Architecture
 
 ### Frontend
 - **Framework**: React 18 with TypeScript
-- **Routing**: Wouter (lightweight client-side router)
-- **State Management**: TanStack React Query for server state (caching, mutations, invalidation)
-- **Forms**: React Hook Form with Zod resolver for validation
-- **Styling**: Tailwind CSS with CSS variables for theming (dark Naruto-inspired color scheme)
-- **UI Components**: shadcn/ui (new-york style) built on Radix UI primitives — all components live in `client/src/components/ui/`
-- **Animations**: Framer Motion for card animations and transitions
+- **Routing**: Wouter — routes: `/` (Dashboard), `/analytics` (Analytics)
+- **State Management**: TanStack React Query for server state
+- **Forms**: React Hook Form with Zod resolver
+- **Styling**: Tailwind CSS with CSS variables (dark Naruto-inspired color scheme)
+- **UI Components**: shadcn/ui (new-york style) in `client/src/components/ui/`
+- **Animations**: Framer Motion for card animations, chakra flow effects, XP bar
+- **Sound Effects**: Web Audio API oscillator-based sounds in `client/src/lib/sounds.ts`
 - **Build Tool**: Vite with React plugin
 - **Path Aliases**: `@/` maps to `client/src/`, `@shared/` maps to `shared/`
 
@@ -25,55 +28,77 @@ Preferred communication style: Simple, everyday language.
 - **Framework**: Express 5 on Node.js
 - **Language**: TypeScript, executed with tsx
 - **API Pattern**: RESTful JSON API under `/api/` prefix
-- **API Contract**: Shared route definitions in `shared/routes.ts` with Zod schemas for input validation — both client and server import from the same source
-- **Build**: esbuild bundles server code to `dist/index.cjs` for production; Vite builds client to `dist/public/`
+- **API Contract**: Shared route definitions in `shared/routes.ts`
+- **Build**: esbuild bundles server code to `dist/index.cjs` for production
 
 ### Data Layer
-- **Database**: PostgreSQL (required, via `DATABASE_URL` environment variable)
-- **ORM**: Drizzle ORM with `drizzle-zod` for schema-to-validation-schema generation
-- **Schema Location**: `shared/schema.ts` — shared between client and server
-- **Migrations**: Drizzle Kit with `db:push` command (push-based, no migration files tracked)
-- **Connection**: `pg` Pool via `server/db.ts`
+- **Database**: PostgreSQL (via `DATABASE_URL`)
+- **ORM**: Drizzle ORM with `drizzle-zod`
+- **Schema Location**: `shared/schema.ts`
+- **Migrations**: Drizzle Kit with `db:push` command
 
 ### Database Schema
-Two tables:
-1. **tasks** — id, title, description, status (pending/completed), priority (genin/chunin/jonin/kage), village, character, team, createdAt, completedAt
-2. **task_updates** — id, taskId (FK to tasks with cascade delete), content, createdAt
+Five tables:
+1. **tasks** — id, title, description, status, priority, village, character, team, happiness, chakra, isRecurring, recurringInterval, estimatedMinutes, lastChakraUpdate, createdAt, completedAt
+2. **task_updates** — id, taskId (FK), content, createdAt
+3. **quick_notes** — id, content, completed, createdAt
+4. **user_stats** — id, totalXp, ninjaRank, currentStreak, longestStreak, totalCompleted, totalCreated, lastActiveDate, experience, level, unlockedVillages, updatedAt
+5. **achievements** — id, key (unique), title, description, icon, unlockedAt
 
 ### API Endpoints
-- `GET /api/tasks` — List all tasks with their updates
-- `POST /api/tasks` — Create a new task
-- `GET /api/tasks/:id` — Get a single task with updates
-- `PATCH /api/tasks/:id` — Update a task
-- `DELETE /api/tasks/:id` — Delete a task
-- `POST /api/tasks/:id/updates` — Add an update/comment to a task
-- `GET /api/export` — Export all data
-- `POST /api/import` — Import data
+- `GET /api/tasks` — List all tasks with updates
+- `POST /api/tasks` — Create a new task (also increments totalCreated stat)
+- `GET /api/tasks/:id` — Get single task
+- `PATCH /api/tasks/:id` — Update task (grants XP, tracks streaks, checks achievements on completion; creates recurring clone if isRecurring)
+- `DELETE /api/tasks/:id` — Delete task
+- `POST /api/tasks/:id/updates` — Add mission log entry
+- `GET /api/data/export` — Export all data
+- `POST /api/data/import` — Import data
+- `GET /api/notes` — List quick notes
+- `POST /api/notes` — Create note
+- `PATCH /api/notes/:id` — Toggle note completion
+- `DELETE /api/notes/:id` — Delete note
+- `GET /api/stats` — Get user stats (XP, rank, streaks)
+- `GET /api/achievements` — List all achievements with unlock status
+
+### Key Features
+1. **XP/Leveling System**: Earn XP per task completion (10/25/50/100 by priority). Ranks: Academy Student → Genin → Chunin → Jonin → ANBU → Kage
+2. **Achievements**: 17 badges for milestones (completions, streaks, XP, rank-ups). Auto-unlock on task completion.
+3. **Daily Streaks**: Tracked via lastActiveDate. Consecutive days increment streak.
+4. **Analytics Dashboard**: `/analytics` page with completion gauge, priority breakdown, village distribution, 14-day activity chart
+5. **Sound Effects**: Oscillator-based sounds for task complete, create, clone, delete, recurring toggle
+6. **Mission Templates**: 6 pre-built templates (Training, Delivery, Intel, Boss Battle, Study, Workout) in CreateTaskDialog
+7. **Time Estimates**: Optional estimatedMinutes field on tasks
+8. **Priority Auto-Adjust**: Tasks >3 days old get orange glow, >7 days get red pulsing glow
+9. **Break Suggestions**: After every 3rd completion, a "Chakra Restoration" toast suggests a break
+10. **Chakra Flow Animation**: Dynamic particle animation on task completion
+11. **Shadow Clone Jutsu**: Duplicate any task with one click
+12. **Summoning Jutsu**: Toggle recurring on any task; completing a recurring task auto-creates a new pending copy
+13. **Hokage Overseer**: Selectable Hokage shown on Leaf Village task cards
+14. **Settings Panel**: Theme, font, Hokage selection, accent color (village presets + custom color wheel)
+15. **Sidebar Tools**: NinjaQuickStats, Achievements, Timer (Sage Mode), Calendar, Quick Notes, Music Player
 
 ### Key Design Decisions
-1. **Shared schema and routes**: The `shared/` directory contains both the database schema and API route contracts, ensuring type safety across the full stack. Both client and server import from the same source of truth.
-2. **Storage abstraction**: `server/storage.ts` defines an `IStorage` interface with a `DatabaseStorage` implementation, allowing the storage backend to be swapped if needed.
-3. **Naruto theming is data-driven**: Character, team, and village data lives in `client/src/hooks/use-tasks.ts` as a `SHINOBI_DATA` constant — it's client-side only and not stored in the database beyond string IDs.
-4. **Dev vs Production serving**: In development, Vite dev server middleware handles the frontend (with HMR). In production, the Express server serves static files from `dist/public/`.
+1. **Shared schema and routes**: `shared/` directory ensures type safety across full stack
+2. **Storage abstraction**: `server/storage.ts` IStorage interface
+3. **Naruto theming is data-driven**: SHINOBI_DATA constant in `client/src/hooks/use-tasks.ts`
+4. **Sound system**: No audio files needed — Web Audio API generates all sounds programmatically
+5. **Achievements**: Definitions live in server routes, checked on each task completion
+6. **LocalStorage keys**: `ninja-theme`, `ninja-font`, `ninja-selected-hokage`, `ninja-accent`, `ninja-accent-custom`, `ninja-sage-duration`, `ninja-break-duration`, `ninja-forest`, `ninja-completion-counter`
 
 ## External Dependencies
 
 ### Required Services
-- **PostgreSQL Database**: Must be provisioned and accessible via `DATABASE_URL` environment variable. Used for all persistent data storage.
+- **PostgreSQL Database**: Via `DATABASE_URL` environment variable
 
 ### Key NPM Dependencies
-- **drizzle-orm** + **drizzle-kit**: ORM and migration tooling for PostgreSQL
-- **express**: HTTP server framework (v5)
-- **@tanstack/react-query**: Async state management on the client
-- **framer-motion**: Animation library for UI transitions
-- **zod** + **drizzle-zod**: Schema validation (shared between client/server)
+- **drizzle-orm** + **drizzle-kit**: ORM and migration tooling
+- **express**: HTTP server (v5)
+- **@tanstack/react-query**: Async state management
+- **framer-motion**: Animation library
+- **zod** + **drizzle-zod**: Schema validation
 - **react-hook-form**: Form state management
 - **wouter**: Client-side routing
-- **shadcn/ui components**: Built on Radix UI primitives (accordion, dialog, tabs, select, toast, etc.)
-- **date-fns**: Date formatting
-- **connect-pg-simple**: PostgreSQL session store (available but sessions may not be actively used yet)
+- **shadcn/ui components**: Radix UI primitives
+- **date-fns**: Date formatting/manipulation
 - **lucide-react**: Icon library
-
-### Replit-Specific
-- **@replit/vite-plugin-runtime-error-modal**: Error overlay in development
-- **@replit/vite-plugin-cartographer** and **@replit/vite-plugin-dev-banner**: Dev-only Replit integration plugins

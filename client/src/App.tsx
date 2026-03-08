@@ -4,6 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Dashboard from "@/pages/Dashboard";
+import Analytics from "@/pages/Analytics";
 import NotFound from "@/pages/not-found";
 import { useEffect, useState } from "react";
 import { SHINOBI_DATA } from "@/hooks/use-tasks";
@@ -13,6 +14,7 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Dashboard} />
+      <Route path="/analytics" component={Analytics} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -38,10 +40,8 @@ function App() {
     }
   }, []);
 
-  // Separate effect for Hokage to avoid re-rendering entire app styles unnecessarily
   useEffect(() => {
     localStorage.setItem("ninja-selected-hokage", selectedHokage);
-    // Dispatch a custom event so other components can update immediately without waiting for storage events
     window.dispatchEvent(new CustomEvent("hokage-changed", { detail: selectedHokage }));
   }, [selectedHokage]);
 
@@ -51,11 +51,11 @@ function App() {
         <div className={`min-h-screen font-${font}`}>
           <Toaster />
           <Router />
-          {/* Settings Toggle Floating Button */}
           <div className="fixed bottom-4 right-4 z-50 flex flex-col items-end gap-2">
             <button 
               onClick={() => setIsSettingsOpen(!isSettingsOpen)}
               className="p-3 bg-primary text-primary-foreground rounded-full shadow-2xl hover:scale-110 transition-transform flex items-center justify-center border-2 border-black/20"
+              data-testid="settings-toggle"
             >
               <span className="text-xl">{isSettingsOpen ? "✕" : "⚙️"}</span>
             </button>
@@ -75,6 +75,7 @@ function App() {
                   <button 
                     onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
                     className="px-3 py-1 bg-neutral-800 text-primary rounded-lg hover:bg-neutral-700 transition-colors text-xs font-bold border border-white/5"
+                    data-testid="theme-toggle"
                   >
                     {theme === "dark" ? "SHADOW" : "LIGHT"}
                   </button>
@@ -90,6 +91,7 @@ function App() {
                       document.body.className = `font-${newFont}`;
                     }}
                     className="p-2 bg-neutral-800 text-white rounded-lg text-[10px] border border-primary/30 outline-none focus:border-primary transition-all font-sans"
+                    data-testid="font-select"
                   >
                     <option value="body">Standard Shinobi</option>
                     <option value="display">Bangers (Action)</option>
@@ -106,6 +108,7 @@ function App() {
                     value={selectedHokage} 
                     onChange={(e) => setSelectedHokage(e.target.value)}
                     className="p-2 bg-neutral-800 text-white rounded-lg text-[10px] border border-primary/30 outline-none focus:border-primary font-sans"
+                    data-testid="hokage-select"
                   >
                     <option value="hashirama">1st: Hashirama</option>
                     <option value="tobirama">2nd: Tobirama</option>
@@ -136,6 +139,7 @@ function App() {
                           style={{ 
                             backgroundColor: `hsl(${SHINOBI_DATA.villages.find(vd => vd.id === v)?.color})` 
                           }}
+                          data-testid={`accent-${v}`}
                         />
                       ))}
                     </div>
@@ -145,8 +149,8 @@ function App() {
                       <input 
                         type="color" 
                         className="w-full h-8 bg-transparent border-none cursor-pointer rounded overflow-hidden"
+                        data-testid="custom-color-picker"
                         onChange={(e) => {
-                          // Convert hex to HSL for compatibility with the system
                           const hex = e.target.value;
                           const r = parseInt(hex.slice(1, 3), 16) / 255;
                           const g = parseInt(hex.slice(3, 5), 16) / 255;

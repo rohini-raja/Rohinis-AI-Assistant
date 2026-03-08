@@ -1,10 +1,13 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Timer, Coffee, Flame, RotateCcw, Volume2, Bell } from "lucide-react";
+import { Coffee, Flame, RotateCcw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 type TimerMode = "SAGE" | "BREAK";
+
+const SAGE_PRESETS = [15, 25, 45, 60];
+const BREAK_PRESETS = [5, 10, 15, 20];
 
 export function NinjaTimer() {
   const [mode, setMode] = useState<TimerMode>("SAGE");
@@ -16,7 +19,9 @@ export function NinjaTimer() {
   const { toast } = useToast();
 
   useEffect(() => {
-    setTimeLeft(mode === "SAGE" ? sageDuration * 60 : breakDuration * 60);
+    if (!isActive) {
+      setTimeLeft(mode === "SAGE" ? sageDuration * 60 : breakDuration * 60);
+    }
   }, [sageDuration, breakDuration, mode]);
 
   useEffect(() => {
@@ -30,7 +35,6 @@ export function NinjaTimer() {
       interval = setInterval(() => {
         setTimeLeft((prev) => {
           const newTime = prev - 1;
-          // Every 30 minutes (1800 seconds) of Sage Mode
           if (mode === "SAGE" && (sageDuration * 60 - newTime) % 1800 === 0 && (sageDuration * 60 - newTime) > 0) {
             const trees = JSON.parse(localStorage.getItem("ninja-forest") || "[]");
             trees.push({ 
@@ -59,7 +63,6 @@ export function NinjaTimer() {
         className: "bg-primary text-primary-foreground border-2 border-black font-display",
       });
 
-      // Play a kunai sound or similar if we had assets
       if ('Notification' in window && Notification.permission === 'granted') {
         new Notification(title, { body: description });
       }
@@ -83,17 +86,30 @@ export function NinjaTimer() {
   
   const resetTimer = () => {
     setIsActive(false);
-    setTimeLeft(mode === "SAGE" ? 25 * 60 : 5 * 60);
+    setTimeLeft(mode === "SAGE" ? sageDuration * 60 : breakDuration * 60);
   };
 
   const switchMode = (newMode: TimerMode) => {
     setMode(newMode);
     setIsActive(false);
-    setTimeLeft(newMode === "SAGE" ? 25 * 60 : 5 * 60);
+    setTimeLeft(newMode === "SAGE" ? sageDuration * 60 : breakDuration * 60);
   };
 
+  const selectPreset = (mins: number) => {
+    if (isActive) return;
+    if (mode === "SAGE") {
+      setSageDuration(mins);
+    } else {
+      setBreakDuration(mins);
+    }
+  };
+
+  const currentDuration = mode === "SAGE" ? sageDuration : breakDuration;
+  const presets = mode === "SAGE" ? SAGE_PRESETS : BREAK_PRESETS;
   const minutes = Math.floor(timeLeft / 60);
   const seconds = timeLeft % 60;
+  const totalSeconds = currentDuration * 60;
+  const progress = totalSeconds > 0 ? ((totalSeconds - timeLeft) / totalSeconds) * 100 : 0;
 
   return (
     <Card className="p-4 bg-neutral-900 border-primary/30 shadow-lg">
@@ -108,6 +124,7 @@ export function NinjaTimer() {
             variant={mode === "SAGE" ? "default" : "outline"} 
             onClick={() => switchMode("SAGE")}
             className="text-[10px] h-7 px-2"
+            data-testid="timer-mode-sage"
           >
             SAGE
           </Button>
@@ -116,49 +133,77 @@ export function NinjaTimer() {
             variant={mode === "BREAK" ? "default" : "outline"} 
             onClick={() => switchMode("BREAK")}
             className="text-[10px] h-7 px-2"
+            data-testid="timer-mode-break"
           >
             BREAK
           </Button>
         </div>
       </div>
 
-      <div className="text-center py-4 relative group">
+      <div className="flex justify-center gap-1 mb-3">
+        {presets.map((mins) => (
+          <Button
+            key={mins}
+            size="sm"
+            variant={currentDuration === mins ? "default" : "outline"}
+            onClick={() => selectPreset(mins)}
+            disabled={isActive}
+            className="text-[10px] h-6 px-2 min-w-[36px]"
+            data-testid={`timer-preset-${mins}`}
+          >
+            {mins}m
+          </Button>
+        ))}
+      </div>
+
+      <div className="relative mb-2">
+        <div className="h-1 bg-neutral-800 rounded-full overflow-hidden">
+          <div 
+            className="h-full bg-primary rounded-full transition-all duration-1000"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+      </div>
+
+      <div className="text-center py-3 relative group">
         {isEditing ? (
           <div className="flex flex-col gap-2 items-center">
             <div className="flex items-center gap-2">
               <span className="text-[10px] font-bold text-neutral-500 uppercase">Set {mode}:</span>
               <input 
                 type="number" 
-                value={mode === "SAGE" ? sageDuration : breakDuration}
+                value={currentDuration}
                 onChange={(e) => {
-                  const val = Math.max(1, parseInt(e.target.value) || 1);
+                  const val = Math.max(1, Math.min(180, parseInt(e.target.value) || 1));
                   if (mode === "SAGE") setSageDuration(val);
                   else setBreakDuration(val);
                 }}
                 className="w-16 bg-neutral-950 border border-primary/30 rounded px-2 py-1 text-white text-xl font-mono"
+                data-testid="timer-custom-input"
               />
               <span className="text-[10px] font-bold text-neutral-500 uppercase">Min</span>
             </div>
-            <Button size="sm" variant="ghost" className="h-6 text-[10px]" onClick={() => setIsEditing(false)}>SAVE</Button>
+            <Button size="sm" variant="ghost" className="h-6 text-[10px]" onClick={() => setIsEditing(false)} data-testid="timer-save-custom">SAVE</Button>
           </div>
         ) : (
           <>
             <span 
               className="text-5xl font-mono font-bold text-white tracking-tighter cursor-pointer hover:text-primary transition-colors"
               onClick={() => !isActive && setIsEditing(true)}
+              data-testid="timer-display"
             >
               {minutes.toString().padStart(2, '0')}:{seconds.toString().padStart(2, '0')}
             </span>
-            <p className="text-[8px] text-neutral-600 uppercase mt-1 opacity-0 group-hover:opacity-100 transition-opacity">Click to adjust time</p>
+            <p className="text-[8px] text-neutral-600 uppercase mt-1 opacity-0 group-hover:opacity-100 transition-opacity">Click to set custom time</p>
           </>
         )}
       </div>
 
-      <div className="flex gap-2 mt-4">
-        <Button onClick={toggleTimer} className="flex-1 bg-primary hover:bg-primary/90">
+      <div className="flex gap-2 mt-3">
+        <Button onClick={toggleTimer} className="flex-1 bg-primary hover:bg-primary/90" data-testid="timer-toggle">
           {isActive ? "PAUSE" : "START"}
         </Button>
-        <Button size="icon" variant="outline" onClick={resetTimer}>
+        <Button size="icon" variant="outline" onClick={resetTimer} data-testid="timer-reset">
           <RotateCcw className="h-4 w-4" />
         </Button>
       </div>

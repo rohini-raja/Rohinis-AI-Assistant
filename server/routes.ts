@@ -1,9 +1,57 @@
 
 import type { Express } from "express";
 import { createServer, type Server } from "http";
-import { storage } from "./storage";
+import { storage, getRankForXp } from "./storage";
 import { api } from "@shared/routes";
 import { z } from "zod";
+
+const XP_TABLE: Record<string, number> = {
+  genin: 10,
+  chunin: 25,
+  jonin: 50,
+  kage: 100,
+};
+
+const ACHIEVEMENT_DEFS = [
+  { key: "first_mission", title: "First Steps", desc: "Complete your first mission", icon: "🎯", check: (s: any) => s.totalCompleted >= 1 },
+  { key: "five_missions", title: "Genin Graduate", desc: "Complete 5 missions", icon: "🎓", check: (s: any) => s.totalCompleted >= 5 },
+  { key: "ten_missions", title: "Chunin Exam", desc: "Complete 10 missions", icon: "📜", check: (s: any) => s.totalCompleted >= 10 },
+  { key: "twentyfive_missions", title: "Jonin Promotion", desc: "Complete 25 missions", icon: "⚡", check: (s: any) => s.totalCompleted >= 25 },
+  { key: "fifty_missions", title: "ANBU Captain", desc: "Complete 50 missions", icon: "🗡️", check: (s: any) => s.totalCompleted >= 50 },
+  { key: "hundred_missions", title: "Shadow Hokage", desc: "Complete 100 missions", icon: "👑", check: (s: any) => s.totalCompleted >= 100 },
+  { key: "streak_3", title: "Will of Fire", desc: "Maintain a 3-day streak", icon: "🔥", check: (s: any) => s.currentStreak >= 3 },
+  { key: "streak_7", title: "Burning Youth", desc: "Maintain a 7-day streak", icon: "💪", check: (s: any) => s.currentStreak >= 7 },
+  { key: "streak_14", title: "Sage's Patience", desc: "Maintain a 14-day streak", icon: "🐸", check: (s: any) => s.currentStreak >= 14 },
+  { key: "streak_30", title: "Legendary Sannin", desc: "Maintain a 30-day streak", icon: "🐍", check: (s: any) => s.currentStreak >= 30 },
+  { key: "xp_500", title: "Chakra Awakening", desc: "Earn 500 XP", icon: "💫", check: (s: any) => s.totalXp >= 500 },
+  { key: "xp_1500", title: "Eight Gates Open", desc: "Earn 1500 XP", icon: "🌀", check: (s: any) => s.totalXp >= 1500 },
+  { key: "xp_5000", title: "Sage Mode Mastered", desc: "Earn 5000 XP", icon: "🧘", check: (s: any) => s.totalXp >= 5000 },
+  { key: "rank_genin", title: "Headband Earned", desc: "Reach Genin rank", icon: "🥋", check: (s: any) => ["genin","chunin","jonin","anbu","kage"].includes(s.ninjaRank) },
+  { key: "rank_chunin", title: "Tactical Mind", desc: "Reach Chunin rank", icon: "🧠", check: (s: any) => ["chunin","jonin","anbu","kage"].includes(s.ninjaRank) },
+  { key: "rank_jonin", title: "Elite Shinobi", desc: "Reach Jonin rank", icon: "⭐", check: (s: any) => ["jonin","anbu","kage"].includes(s.ninjaRank) },
+  { key: "rank_kage", title: "Village Leader", desc: "Reach Kage rank", icon: "🏔️", check: (s: any) => s.ninjaRank === "kage" },
+];
+
+async function checkAndUnlockAchievements(stats: any) {
+  const unlocked: any[] = [];
+  for (const def of ACHIEVEMENT_DEFS) {
+    if (def.check(stats)) {
+      const result = await storage.unlockAchievement(def.key, def.title, def.desc, def.icon);
+      if (result) unlocked.push(result);
+    }
+  }
+  return unlocked;
+}
+
+function getTodayStr() {
+  return new Date().toISOString().split('T')[0];
+}
+
+function getYesterdayStr() {
+  const d = new Date();
+  d.setDate(d.getDate() - 1);
+  return d.toISOString().split('T')[0];
+}
 
 export async function registerRoutes(
   httpServer: Server,
@@ -19,6 +67,10 @@ export async function registerRoutes(
     try {
       const input = api.tasks.create.input.parse(req.body);
       const task = await storage.createTask(input);
+      
+      const stats = await storage.getStats();
+      await storage.updateStats({ totalCreated: stats.totalCreated + 1 });
+
       res.status(201).json(task);
     } catch (err) {
       if (err instanceof z.ZodError) {
@@ -51,15 +103,50 @@ export async function registerRoutes(
         return res.status(404).json({ message: 'Task not found' });
       }
 
-      // Summoning Jutsu Logic: If recurring and just completed, summon a new clone
-      if (input.status === 'completed' && task.isRecurring && existingTask?.status === 'pending') {
-        const { id: _, updates: __, createdAt: ___, completedAt: ____, ...cloneData } = task;
-        await storage.createTask({
-          ...cloneData,
-          status: 'pending',
-          chakra: 100,
-          lastChakraUpdate: new Date()
+      if (input.status === 'completed' && existingTask?.status === 'pending') {
+        const xpGained = XP_TABLE[task.priority] || 10;
+        const stats = await storage.getStats();
+        const today = getTodayStr();
+        const yesterday = getYesterdayStr();
+        
+        let newStreak = stats.currentStreak;
+        if (stats.lastActiveDate === today) {
+        } else if (stats.lastActiveDate === yesterday) {
+          newStreak = stats.currentStreak + 1;
+        } else {
+          newStreak = 1;
+        }
+        
+        const newXp = stats.totalXp + xpGained;
+        const newRank = getRankForXp(newXp);
+        const newLongest = Math.max(stats.longestStreak, newStreak);
+        
+        const updatedStats = await storage.updateStats({
+          totalXp: newXp,
+          totalCompleted: stats.totalCompleted + 1,
+          currentStreak: newStreak,
+          longestStreak: newLongest,
+          lastActiveDate: today,
+          ninjaRank: newRank,
         });
+
+        await checkAndUnlockAchievements(updatedStats);
+
+        if (task.isRecurring) {
+          await storage.createTask({
+            title: task.title,
+            description: task.description,
+            status: 'pending',
+            priority: task.priority,
+            village: task.village,
+            character: task.character,
+            team: task.team,
+            happiness: task.happiness,
+            isRecurring: task.isRecurring,
+            recurringInterval: task.recurringInterval,
+            estimatedMinutes: task.estimatedMinutes,
+          });
+        }
       }
 
       res.json(task);
@@ -70,6 +157,7 @@ export async function registerRoutes(
           field: err.errors[0].path.join('.'),
         });
       } else {
+        console.error("Update error:", err);
         res.status(500).json({ message: "Internal Server Error" });
       }
     }
@@ -104,19 +192,13 @@ export async function registerRoutes(
     }
   });
 
-  // Export Data
   app.get(api.data.export.path, async (_req, res) => {
     const tasks = await storage.getTasks();
     const flatTasks = tasks.map(({ updates, ...t }) => t);
     const flatUpdates = tasks.flatMap(t => t.updates);
-
-    res.json({
-      tasks: flatTasks,
-      updates: flatUpdates
-    });
+    res.json({ tasks: flatTasks, updates: flatUpdates });
   });
 
-  // Import Data
   app.post(api.data.import.path, async (req, res) => {
     try {
       const data = req.body;
@@ -130,7 +212,6 @@ export async function registerRoutes(
     }
   });
 
-  // Quick Notes API
   app.get("/api/notes", async (_req, res) => {
     const notes = await storage.getQuickNotes();
     res.json(notes);
@@ -149,6 +230,27 @@ export async function registerRoutes(
   app.delete("/api/notes/:id", async (req, res) => {
     await storage.deleteQuickNote(Number(req.params.id));
     res.status(204).end();
+  });
+
+  app.get("/api/stats", async (_req, res) => {
+    const stats = await storage.getStats();
+    res.json(stats);
+  });
+
+  app.get("/api/achievements", async (_req, res) => {
+    const achvs = await storage.getAchievements();
+    const allDefs = ACHIEVEMENT_DEFS.map(def => {
+      const unlocked = achvs.find(a => a.key === def.key);
+      return {
+        key: def.key,
+        title: def.title,
+        description: def.desc,
+        icon: def.icon,
+        unlocked: !!unlocked,
+        unlockedAt: unlocked?.unlockedAt || null,
+      };
+    });
+    res.json(allDefs);
   });
 
   return httpServer;
@@ -172,7 +274,7 @@ async function seedDatabase() {
       content: "Step 1: Rotation complete. Used a water balloon."
     });
 
-    const task2 = await storage.createTask({
+    await storage.createTask({
       title: "Deliver Secret Scroll to Sand Village",
       description: "Urgent mission from Lady Tsunade. Watch out for rogue ninjas.",
       status: "pending",

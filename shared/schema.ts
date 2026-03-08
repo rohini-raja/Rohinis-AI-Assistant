@@ -15,7 +15,8 @@ export const tasks = pgTable("tasks", {
   happiness: integer("happiness").default(50).notNull(),
   chakra: integer("chakra").default(100).notNull(),
   isRecurring: boolean("is_recurring").default(false).notNull(),
-  recurringInterval: text("recurring_interval"), // "daily", "weekly", etc.
+  recurringInterval: text("recurring_interval"),
+  estimatedMinutes: integer("estimated_minutes"),
   lastChakraUpdate: timestamp("last_chakra_update").defaultNow(),
   createdAt: timestamp("created_at").defaultNow(),
   completedAt: timestamp("completed_at"),
@@ -23,10 +24,26 @@ export const tasks = pgTable("tasks", {
 
 export const userStats = pgTable("user_stats", {
   id: serial("id").primaryKey(),
+  totalXp: integer("total_xp").default(0).notNull(),
+  ninjaRank: text("ninja_rank").default("academy").notNull(),
+  currentStreak: integer("current_streak").default(0).notNull(),
+  longestStreak: integer("longest_streak").default(0).notNull(),
+  totalCompleted: integer("total_completed").default(0).notNull(),
+  totalCreated: integer("total_created").default(0).notNull(),
+  lastActiveDate: text("last_active_date"),
   experience: integer("experience").default(0).notNull(),
   level: text("level").default("genin").notNull(),
   unlockedVillages: text("unlocked_villages").array().default(["leaf"]).notNull(),
   updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const achievements = pgTable("achievements", {
+  id: serial("id").primaryKey(),
+  key: text("key").notNull().unique(),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  icon: text("icon").notNull(),
+  unlockedAt: timestamp("unlocked_at").defaultNow(),
 });
 
 export const taskUpdates = pgTable("task_updates", {
@@ -59,6 +76,8 @@ export type TaskUpdate = typeof taskUpdates.$inferSelect;
 export type InsertTaskUpdate = z.infer<typeof insertTaskUpdateSchema>;
 export type QuickNote = typeof quickNotes.$inferSelect;
 export type InsertQuickNote = z.infer<typeof insertQuickNoteSchema>;
+export type UserStats = typeof userStats.$inferSelect;
+export type Achievement = typeof achievements.$inferSelect;
 
 export type CreateTaskRequest = InsertTask;
 export type UpdateTaskRequest = Partial<InsertTask>;

@@ -4,11 +4,12 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Input } from "@/components/ui/input";
-import { format } from "date-fns";
-import { Check, Trash2, ShieldAlert, Shield, ShieldCheck, Crown, Scroll, Send, Heart, HeartOff, Copy, RefreshCw } from "lucide-react";
+import { format, differenceInDays } from "date-fns";
+import { Check, Trash2, ShieldAlert, Shield, ShieldCheck, Crown, Scroll, Send, Heart, HeartOff, Copy, RefreshCw, Clock } from "lucide-react";
 import { useUpdateTask, useDeleteTask, useAddTaskUpdate, useCreateTask, SHINOBI_DATA } from "@/hooks/use-tasks";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { playCompleteSound, playCloneSound, playDeleteSound, playRecurringSound } from "@/lib/sounds";
 
 interface TaskCardProps {
   task: TaskWithUpdates;
@@ -46,6 +47,7 @@ export function TaskCard({ task }: TaskCardProps) {
   const createTask = useCreateTask();
   const addUpdate = useAddTaskUpdate();
   const [updateText, setUpdateText] = useState("");
+  const [showChakraAnimation, setShowChakraAnimation] = useState(false);
   const [currentHokageId, setCurrentHokageId] = useState(localStorage.getItem("ninja-selected-hokage") || "tsunade");
 
   useEffect(() => {
@@ -59,7 +61,6 @@ export function TaskCard({ task }: TaskCardProps) {
   const charData = SHINOBI_DATA.characters.find(c => c.id === task.character);
   const teamData = SHINOBI_DATA.teams.find(t => t.id === task.team);
   
-  // Find the Kage for this village
   const villageKage = task.village === "leaf" 
     ? SHINOBI_DATA.characters.find(c => c.id === currentHokageId)
     : (SHINOBI_DATA.characters.find(c => c.village === task.village && c.team === 'kage') || 
@@ -68,7 +69,6 @@ export function TaskCard({ task }: TaskCardProps) {
   const overseerChar = task.village === "leaf" ? villageKage : null;
   const assignedChar = SHINOBI_DATA.characters.find(c => c.id === task.character);
 
-  // Animation variants for Hokage/Kage
   const kageAnimation = {
     animate: {
       y: [0, -5, 0],
@@ -86,7 +86,12 @@ export function TaskCard({ task }: TaskCardProps) {
     }
   };
 
+  const daysSinceCreated = task.createdAt ? differenceInDays(new Date(), new Date(task.createdAt)) : 0;
+  const isOverdue = task.status === 'pending' && daysSinceCreated > 3;
+  const isUrgent = task.status === 'pending' && daysSinceCreated > 7;
+
   const handleShadowClone = () => {
+    playCloneSound();
     const { id, updates, createdAt, completedAt, ...cloneData } = task;
     createTask.mutate({
       ...cloneData,
@@ -95,6 +100,7 @@ export function TaskCard({ task }: TaskCardProps) {
   };
 
   const handleToggleRecurring = () => {
+    playRecurringSound();
     updateTask.mutate({ 
       id: task.id, 
       isRecurring: !task.isRecurring,
@@ -106,7 +112,13 @@ export function TaskCard({ task }: TaskCardProps) {
     const newStatus = task.status === 'pending' ? 'completed' : 'pending';
     const completedAt = newStatus === 'completed' ? new Date().toISOString() : null;
     
-    // @ts-ignore - Date string/object mismatch in types but works at runtime
+    if (newStatus === 'completed') {
+      playCompleteSound();
+      setShowChakraAnimation(true);
+      setTimeout(() => setShowChakraAnimation(false), 2000);
+    }
+    
+    // @ts-ignore
     updateTask.mutate({ id: task.id, status: newStatus, completedAt });
   };
 
@@ -121,6 +133,11 @@ export function TaskCard({ task }: TaskCardProps) {
     updateTask.mutate({ id: task.id, happiness: val });
   };
 
+  const handleDelete = () => {
+    playDeleteSound();
+    deleteTask.mutate(task.id);
+  };
+
   const getHappinessIcon = (val: number) => {
     if (val >= 80) return "🔥";
     if (val >= 50) return "😊";
@@ -128,38 +145,63 @@ export function TaskCard({ task }: TaskCardProps) {
     return "😞";
   };
 
+  const overdueGlow = isUrgent 
+    ? 'shadow-[0_0_20px_rgba(255,50,50,0.4)] border-red-500/40' 
+    : isOverdue 
+    ? 'shadow-[0_0_12px_rgba(255,150,50,0.3)] border-orange-500/30' 
+    : '';
+
   return (
     <NinjaCard 
       village={task.village} 
       character={task.character}
-      className={`transition-all duration-500 relative group/card pt-12 overflow-hidden border-none bg-gradient-to-br from-neutral-900/90 to-neutral-950/90 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.4)] hover:shadow-primary/20 ${task.status === 'completed' ? 'opacity-60 grayscale-[0.3]' : ''}`}
+      className={`transition-all duration-500 relative group/card pt-12 overflow-hidden border-none bg-gradient-to-br from-neutral-900/90 to-neutral-950/90 backdrop-blur-xl hover:shadow-primary/20 ${task.status === 'completed' ? 'opacity-60 grayscale-[0.3]' : ''} ${overdueGlow}`}
+      data-testid={`task-card-${task.id}`}
     >
-      {/* Dynamic Chakra Flow Animation on Completion */}
       <AnimatePresence>
-        {task.status === 'completed' && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="absolute inset-0 z-0 pointer-events-none"
+        {showChakraAnimation && (
+          <motion.div
+            initial={{ scale: 0, opacity: 1 }}
+            animate={{ scale: 3, opacity: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1.5, ease: "easeOut" }}
+            className="absolute inset-0 z-30 pointer-events-none flex items-center justify-center"
           >
-            <motion.div 
-              animate={{ 
-                scale: [1, 1.2, 1],
-                opacity: [0.1, 0.3, 0.1],
-                rotate: [0, 90, 180, 270, 360]
-              }}
-              transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
-              className="absolute inset-[-50%] bg-[conic-gradient(from_0deg,transparent,var(--primary),transparent)] opacity-20 blur-3xl"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-primary/10 to-transparent" />
+            <div className="w-20 h-20 rounded-full bg-gradient-to-r from-primary via-yellow-400 to-primary blur-md" />
           </motion.div>
+        )}
+        {showChakraAnimation && (
+          <>
+            {[0, 1, 2, 3, 4, 5].map(i => (
+              <motion.div
+                key={`particle-${i}`}
+                initial={{ x: 0, y: 0, opacity: 1, scale: 1 }}
+                animate={{ 
+                  x: (Math.random() - 0.5) * 200, 
+                  y: (Math.random() - 0.5) * 200, 
+                  opacity: 0, 
+                  scale: 0 
+                }}
+                transition={{ duration: 1 + Math.random() * 0.5, ease: "easeOut" }}
+                className="absolute left-1/2 top-1/2 w-2 h-2 rounded-full bg-primary z-30 pointer-events-none"
+              />
+            ))}
+          </>
         )}
       </AnimatePresence>
 
-      {/* Sleek Glassmorphism Header Decoration */}
+      {isOverdue && task.status === 'pending' && (
+        <motion.div 
+          className="absolute inset-0 pointer-events-none z-0"
+          animate={{ opacity: [0.05, 0.15, 0.05] }}
+          transition={{ duration: isUrgent ? 1.5 : 3, repeat: Infinity }}
+        >
+          <div className={`w-full h-full ${isUrgent ? 'bg-red-500/20' : 'bg-orange-500/10'}`} />
+        </motion.div>
+      )}
+
       <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary/50 to-transparent opacity-30" />
       
-      {/* Kage Animation Overlay - Repositioned for sleekness */}
       {villageKage && (
         <motion.div 
           className="absolute top-3 left-4 flex items-center gap-2 z-20 pointer-events-none"
@@ -169,39 +211,28 @@ export function TaskCard({ task }: TaskCardProps) {
         >
           <div className="relative">
             <motion.div 
-              animate={{ 
-                scale: [1, 1.2, 1], 
-                opacity: [0.1, 0.3, 0.1],
-              }}
+              animate={{ scale: [1, 1.2, 1], opacity: [0.1, 0.3, 0.1] }}
               transition={{ duration: 4, repeat: Infinity }}
               className="absolute inset-0 bg-primary rounded-full blur-md"
             />
-            <motion.div 
-              className="w-8 h-8 rounded-full border border-primary/30 overflow-hidden bg-neutral-900/80 relative"
-            >
+            <motion.div className="w-8 h-8 rounded-full border border-primary/30 overflow-hidden bg-neutral-900/80 relative">
               <img 
                 src={`/images/characters/${villageKage.id}.png`} 
                 alt={villageKage.name}
                 className="w-full h-full object-cover"
-                onError={(e) => {
-                  e.currentTarget.style.display = 'none';
-                }}
+                onError={(e) => { e.currentTarget.style.display = 'none'; }}
               />
-              {!villageKage.id && <Crown className="w-4 h-4 m-2 text-primary/70" />}
             </motion.div>
           </div>
           <div className="flex flex-col">
             <span className="text-[6px] text-neutral-500 uppercase font-medium tracking-[0.2em] leading-none mb-1">Overseer</span>
-            <motion.span 
-              className="text-[10px] font-sans font-bold text-primary/80 uppercase tracking-wider leading-none"
-            >
+            <motion.span className="text-[10px] font-sans font-bold text-primary/80 uppercase tracking-wider leading-none">
               {villageKage.name}
             </motion.span>
           </div>
         </motion.div>
       )}
 
-      {/* Character Image Overlay - Modern placement */}
       <motion.div 
         className="absolute -top-4 -right-4 w-40 h-40 pointer-events-none opacity-10 group-hover/card:opacity-30 transition-all duration-700 blur-[2px] group-hover/card:blur-none"
         whileHover={{ scale: 1.05, x: -10, y: 10 }}
@@ -211,9 +242,7 @@ export function TaskCard({ task }: TaskCardProps) {
           src={`/images/characters/${overseerChar?.id || task.character}.png`} 
           alt={overseerChar?.id || task.character}
           className="w-full h-full object-contain"
-          onError={(e) => {
-            e.currentTarget.style.display = 'none';
-          }}
+          onError={(e) => { e.currentTarget.style.display = 'none'; }}
         />
       </motion.div>
 
@@ -225,6 +254,16 @@ export function TaskCard({ task }: TaskCardProps) {
               <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20 font-mono uppercase tracking-tighter">
                 {task.priority}
               </span>
+              {task.isRecurring && (
+                <span className="text-[8px] px-1.5 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 font-mono uppercase tracking-tighter flex items-center gap-1">
+                  <RefreshCw className="h-2.5 w-2.5" /> {task.recurringInterval || "daily"}
+                </span>
+              )}
+              {isOverdue && task.status === 'pending' && (
+                <span className={`text-[8px] px-1.5 py-0.5 rounded-full font-mono uppercase tracking-tighter flex items-center gap-1 ${isUrgent ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 'bg-orange-500/15 text-orange-400 border border-orange-500/20'}`}>
+                  <Clock className="h-2.5 w-2.5" /> {daysSinceCreated}d
+                </span>
+              )}
             </div>
             
             <h3 className={`text-2xl font-sans font-black tracking-tight leading-tight ${task.status === 'completed' ? 'line-through text-neutral-500' : 'text-white'}`}>
@@ -240,6 +279,7 @@ export function TaskCard({ task }: TaskCardProps) {
               className="rounded-xl h-10 w-10 border bg-neutral-800/50 border-neutral-700/50 hover:border-primary/50 hover:text-primary transition-all"
               onClick={handleShadowClone}
               disabled={createTask.isPending}
+              data-testid={`clone-task-${task.id}`}
             >
               <Copy className="h-4 w-4" />
             </Button>
@@ -250,8 +290,9 @@ export function TaskCard({ task }: TaskCardProps) {
               className={`rounded-xl h-10 w-10 border transition-all ${task.isRecurring ? 'bg-primary/20 text-primary border-primary/40' : 'bg-neutral-800/50 border-neutral-700/50 hover:border-primary/50 hover:text-primary'}`}
               onClick={handleToggleRecurring}
               disabled={updateTask.isPending}
+              data-testid={`recurring-task-${task.id}`}
             >
-              <RefreshCw className={`h-4 w-4 ${task.isRecurring ? 'animate-spin-slow' : ''}`} />
+              <RefreshCw className={`h-4 w-4 ${task.isRecurring ? 'animate-spin' : ''}`} style={task.isRecurring ? { animationDuration: '3s' } : {}} />
             </Button>
             <Button
               size="icon"
@@ -259,6 +300,7 @@ export function TaskCard({ task }: TaskCardProps) {
               className={`rounded-xl h-10 w-10 border transition-all duration-300 ${task.status === 'completed' ? 'bg-green-500/20 text-green-400 border-green-500/30' : 'bg-neutral-800/50 border-neutral-700/50 hover:border-primary/50 hover:text-primary'}`}
               onClick={handleToggleStatus}
               disabled={updateTask.isPending}
+              data-testid={`complete-task-${task.id}`}
             >
               <Check className={`h-5 w-5 ${task.status === 'completed' ? 'scale-110' : ''}`} />
             </Button>
@@ -266,8 +308,9 @@ export function TaskCard({ task }: TaskCardProps) {
               size="icon"
               variant="ghost"
               className="text-neutral-500 hover:text-red-400 hover:bg-red-400/10 rounded-xl h-10 w-10 border border-transparent hover:border-red-400/20 transition-all"
-              onClick={() => deleteTask.mutate(task.id)}
+              onClick={handleDelete}
               disabled={deleteTask.isPending}
+              data-testid={`delete-task-${task.id}`}
             >
               <Trash2 className="h-4 w-4" />
             </Button>
@@ -296,9 +339,17 @@ export function TaskCard({ task }: TaskCardProps) {
              <span className="text-[8px] uppercase text-neutral-500 font-bold tracking-widest">Date</span>
              <span className="text-[11px] font-mono text-neutral-400">{format(new Date(task.createdAt || new Date()), "dd.MM.yy")}</span>
            </div>
+           {task.estimatedMinutes && (
+             <>
+               <div className="h-6 w-px bg-neutral-800" />
+               <div className="flex flex-col gap-0.5">
+                 <span className="text-[8px] uppercase text-neutral-500 font-bold tracking-widest">Est.</span>
+                 <span className="text-[11px] font-mono text-blue-400">{task.estimatedMinutes}m</span>
+               </div>
+             </>
+           )}
         </div>
 
-        {/* Modern Slider */}
         <div className="group/slider relative pt-1">
           <input 
             type="range" 
@@ -343,6 +394,7 @@ export function TaskCard({ task }: TaskCardProps) {
                       onChange={(e) => setUpdateText(e.target.value)}
                       placeholder="Add intel..." 
                       className="h-9 text-xs bg-neutral-950/50 border-neutral-800 focus-visible:ring-1 focus-visible:ring-primary/50 rounded-lg pr-10"
+                      data-testid={`update-input-${task.id}`}
                     />
                     <Button 
                       type="submit" 
@@ -350,6 +402,7 @@ export function TaskCard({ task }: TaskCardProps) {
                       variant="ghost"
                       className="absolute right-1 top-1 h-7 w-7 text-neutral-500 hover:text-primary transition-colors" 
                       disabled={addUpdate.isPending || !updateText.trim()}
+                      data-testid={`update-submit-${task.id}`}
                     >
                       <Send className="h-3.5 w-3.5" />
                     </Button>

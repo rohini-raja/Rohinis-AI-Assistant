@@ -1,6 +1,16 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api, buildUrl, type CreateTaskRequest, type UpdateTaskRequest, type CreateUpdateRequest, type TaskWithUpdates, type ImportData } from "@shared/routes";
 import { useToast } from "@/hooks/use-toast";
+import { playCompleteSound, playCreateSound, playAchievementSound } from "@/lib/sounds";
+
+const BREAK_QUOTES = [
+  { text: "Even the strongest shinobi needs rest. Take a break!", author: "Kakashi Hatake" },
+  { text: "Your chakra needs time to replenish. Go stretch!", author: "Jiraiya" },
+  { text: "A well-rested ninja is a deadly ninja. Rest up!", author: "Tsunade" },
+  { text: "The power of youth requires recovery time too!", author: "Might Guy" },
+];
+
+let completionCounter = parseInt(localStorage.getItem("ninja-completion-counter") || "0");
 
 export const SHINOBI_DATA = {
   characters: [
@@ -119,6 +129,7 @@ export function useCreateTask() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [api.tasks.list.path] });
+      queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
       toast({
         title: "Mission Assigned!",
         description: "A new mission has been added to your scroll.",
@@ -145,8 +156,12 @@ export function useUpdateTask() {
     },
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: [api.tasks.list.path] });
+      queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/achievements"] });
       
-      if (data.status === 'completed') {
+      const wasCompletionTransition = variables.status === 'completed' && data.status === 'completed';
+      
+      if (wasCompletionTransition) {
         const char = SHINOBI_DATA.characters.find(c => c.id === data.character);
         const quote = char ? char.quote : getRandomQuote();
         
@@ -155,6 +170,20 @@ export function useUpdateTask() {
           description: quote,
           className: "bg-green-600 text-white border-2 border-black font-shinobi text-lg tracking-wide",
         });
+
+        completionCounter++;
+        localStorage.setItem("ninja-completion-counter", completionCounter.toString());
+        
+        if (completionCounter % 3 === 0) {
+          const breakQuote = BREAK_QUOTES[Math.floor(Math.random() * BREAK_QUOTES.length)];
+          setTimeout(() => {
+            toast({
+              title: "Chakra Restoration Recommended",
+              description: `${breakQuote.text} — ${breakQuote.author}`,
+              className: "bg-blue-600 text-white border-2 border-blue-800",
+            });
+          }, 2000);
+        }
       } else {
         toast({
           title: "Mission Updated",
@@ -177,6 +206,7 @@ export function useDeleteTask() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [api.tasks.list.path] });
+      queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
       toast({
         title: "Mission Abandoned",
         description: "The mission scroll has been burned.",
