@@ -35,7 +35,7 @@ export function NinjaTimer() {
       interval = setInterval(() => {
         setTimeLeft((prev) => {
           const newTime = prev - 1;
-          if (mode === "SAGE" && (sageDuration * 60 - newTime) % 1800 === 0 && (sageDuration * 60 - newTime) > 0) {
+          if (mode === "SAGE" && (sageDuration * 60 - newTime) % 1200 === 0 && (sageDuration * 60 - newTime) > 0) {
             const trees = JSON.parse(localStorage.getItem("ninja-forest") || "[]");
             trees.push({ 
               id: Date.now(), 

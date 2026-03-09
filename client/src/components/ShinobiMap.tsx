@@ -146,6 +146,18 @@ export function ShinobiMap({ tasks, onVillageClick, activeVillage }: ShinobiMapP
           <div className="w-2 h-2 rounded-full border border-white/30 bg-red-500" />
           <span>Hokage Council</span>
         </div>
+        {(() => {
+          try {
+            const treeCount = JSON.parse(localStorage.getItem("ninja-forest") || "[]").length;
+            if (treeCount > 0) return (
+              <div className="flex items-center gap-2 mt-1">
+                <span className="text-[10px]">🌲</span>
+                <span className="text-green-400">Focus Forest ({treeCount} tree{treeCount !== 1 ? 's' : ''}) — 20min each</span>
+              </div>
+            );
+            return null;
+          } catch { return null; }
+        })()}
       </div>
     </div>
   );

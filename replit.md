@@ -85,7 +85,7 @@ Six tables:
 13. **Hokage Overseer**: Selectable Hokage shown on Leaf Village task cards
 14. **Settings Panel**: Theme, font, Hokage selection, accent color (village presets + custom color wheel)
 15. **Sidebar Tools**: NinjaQuickStats, Achievements, Timer (Sage Mode with presets), Mission Prep, Calendar, Quick Notes, Music Player (Deezer-powered)
-16. **Mission Prep Packing List**: Category-organized packing checklist (weapons/scrolls/provisions/attire/medical/tools) with quick-add templates, progress bar, animated check-offs, and clear-all
+16. **Mission Prep Packing List**: Category-organized packing checklist (weapons/scrolls/provisions/attire/medical/tools) with quick-add templates, progress bar, animated check-offs, collapsible categories, multiple named lists, unpack-all, and clear-all
 
 ### Key Design Decisions
 1. **Shared schema and routes**: `shared/` directory ensures type safety across full stack
@@ -93,7 +93,7 @@ Six tables:
 3. **Naruto theming is data-driven**: SHINOBI_DATA constant in `client/src/hooks/use-tasks.ts`
 4. **Sound system**: No audio files needed — Web Audio API generates all sounds programmatically
 5. **Achievements**: Definitions live in server routes, checked on each task completion
-6. **LocalStorage keys**: `ninja-theme`, `ninja-font`, `ninja-selected-hokage`, `ninja-accent`, `ninja-accent-custom`, `ninja-sage-duration`, `ninja-break-duration`, `ninja-forest`, `ninja-completion-counter`
+6. **LocalStorage keys**: `ninja-theme`, `ninja-font`, `ninja-selected-hokage`, `ninja-accent`, `ninja-accent-custom`, `ninja-sage-duration`, `ninja-break-duration`, `ninja-forest`, `ninja-completion-counter`, `ninja-packing-lists`, `ninja-active-packing-list`
 
 ## External Dependencies
 
