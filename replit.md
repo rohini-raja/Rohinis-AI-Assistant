@@ -38,12 +38,13 @@ Preferred communication style: Simple, everyday language.
 - **Migrations**: Drizzle Kit with `db:push` command
 
 ### Database Schema
-Five tables:
+Six tables:
 1. **tasks** — id, title, description, status, priority, village, character, team, happiness, chakra, isRecurring, recurringInterval, estimatedMinutes, lastChakraUpdate, createdAt, completedAt
 2. **task_updates** — id, taskId (FK), content, createdAt
 3. **quick_notes** — id, content, completed, createdAt
 4. **user_stats** — id, totalXp, ninjaRank, currentStreak, longestStreak, totalCompleted, totalCreated, lastActiveDate, experience, level, unlockedVillages, updatedAt
 5. **achievements** — id, key (unique), title, description, icon, unlockedAt
+6. **packing_items** — id, content, category (weapons/scrolls/provisions/attire/medical/tools), packed, listName, createdAt
 
 ### API Endpoints
 - `GET /api/tasks` — List all tasks with updates
@@ -60,6 +61,11 @@ Five tables:
 - `DELETE /api/notes/:id` — Delete note
 - `GET /api/stats` — Get user stats (XP, rank, streaks)
 - `GET /api/achievements` — List all achievements with unlock status
+- `GET /api/packing` — List packing items (optional ?list= filter)
+- `POST /api/packing` — Create packing item
+- `PATCH /api/packing/:id` — Toggle packed status
+- `DELETE /api/packing/:id` — Delete packing item
+- `DELETE /api/packing/list/:name` — Clear entire packing list
 - `GET /api/music/search?q=...` — Search songs via Deezer API (returns 30s previews)
 - `GET /api/music/playlist/:name` — Fetch curated playlists (naruto_openings, naruto_endings, naruto_ost, naruto_lofi)
 
@@ -78,7 +84,8 @@ Five tables:
 12. **Summoning Jutsu**: Toggle recurring on any task; completing a recurring task auto-creates a new pending copy
 13. **Hokage Overseer**: Selectable Hokage shown on Leaf Village task cards
 14. **Settings Panel**: Theme, font, Hokage selection, accent color (village presets + custom color wheel)
-15. **Sidebar Tools**: NinjaQuickStats, Achievements, Timer (Sage Mode with presets), Calendar, Quick Notes, Music Player (Deezer-powered)
+15. **Sidebar Tools**: NinjaQuickStats, Achievements, Timer (Sage Mode with presets), Mission Prep, Calendar, Quick Notes, Music Player (Deezer-powered)
+16. **Mission Prep Packing List**: Category-organized packing checklist (weapons/scrolls/provisions/attire/medical/tools) with quick-add templates, progress bar, animated check-offs, and clear-all
 
 ### Key Design Decisions
 1. **Shared schema and routes**: `shared/` directory ensures type safety across full stack

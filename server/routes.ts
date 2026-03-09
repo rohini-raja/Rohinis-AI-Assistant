@@ -253,6 +253,50 @@ export async function registerRoutes(
     res.json(allDefs);
   });
 
+  app.get("/api/packing", async (req, res) => {
+    const listName = (req.query.list as string) || undefined;
+    const items = await storage.getPackingItems(listName);
+    res.json(items);
+  });
+
+  app.post("/api/packing", async (req, res) => {
+    try {
+      const { insertPackingItemSchema } = await import("@shared/schema");
+      const input = insertPackingItemSchema.parse(req.body);
+      const item = await storage.createPackingItem(input);
+      res.status(201).json(item);
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        return res.status(400).json({ errors: err.errors });
+      }
+      throw err;
+    }
+  });
+
+  app.patch("/api/packing/:id", async (req, res) => {
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) return res.status(400).json({ message: "Invalid id" });
+    const packed = req.body?.packed;
+    if (typeof packed !== "boolean") return res.status(400).json({ message: "packed must be a boolean" });
+    const item = await storage.updatePackingItem(id, packed);
+    if (!item) return res.status(404).json({ message: "Item not found" });
+    res.json(item);
+  });
+
+  app.delete("/api/packing/:id", async (req, res) => {
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) return res.status(400).json({ message: "Invalid id" });
+    await storage.deletePackingItem(id);
+    res.status(204).send();
+  });
+
+  app.delete("/api/packing/list/:name", async (req, res) => {
+    const name = req.params.name;
+    if (!name) return res.status(400).json({ message: "List name required" });
+    await storage.clearPackingList(name);
+    res.status(204).send();
+  });
+
   app.get("/api/music/search", async (req, res) => {
     try {
       const query = (req.query.q as string) || "";

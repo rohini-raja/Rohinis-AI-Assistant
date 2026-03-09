@@ -60,6 +60,19 @@ export const quickNotes = pgTable("quick_notes", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const packingItems = pgTable("packing_items", {
+  id: serial("id").primaryKey(),
+  content: text("content").notNull(),
+  category: text("category", { enum: ["weapons", "scrolls", "provisions", "attire", "medical", "tools"] }).default("tools").notNull(),
+  packed: boolean("packed").default(false).notNull(),
+  listName: text("list_name").default("default").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertPackingItemSchema = createInsertSchema(packingItems).omit({ id: true, createdAt: true });
+export type PackingItem = typeof packingItems.$inferSelect;
+export type InsertPackingItem = z.infer<typeof insertPackingItemSchema>;
+
 export const insertTaskSchema = createInsertSchema(tasks).omit({ 
   id: true, 
   createdAt: true, 

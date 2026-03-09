@@ -1,6 +1,6 @@
 
 import { db } from "./db";
-import { tasks, taskUpdates, quickNotes, userStats, achievements, type Task, type InsertTask, type TaskUpdate, type InsertTaskUpdate, type QuickNote, type InsertQuickNote, type UserStats, type Achievement } from "@shared/schema";
+import { tasks, taskUpdates, quickNotes, userStats, achievements, packingItems, type Task, type InsertTask, type TaskUpdate, type InsertTaskUpdate, type QuickNote, type InsertQuickNote, type UserStats, type Achievement, type PackingItem, type InsertPackingItem } from "@shared/schema";
 import { eq, desc } from "drizzle-orm";
 
 export interface IStorage {
@@ -20,6 +20,11 @@ export interface IStorage {
   updateStats(updates: Partial<UserStats>): Promise<UserStats>;
   getAchievements(): Promise<Achievement[]>;
   unlockAchievement(key: string, title: string, description: string, icon: string): Promise<Achievement | null>;
+  getPackingItems(listName?: string): Promise<PackingItem[]>;
+  createPackingItem(item: InsertPackingItem): Promise<PackingItem>;
+  updatePackingItem(id: number, packed: boolean): Promise<PackingItem | undefined>;
+  deletePackingItem(id: number): Promise<void>;
+  clearPackingList(listName: string): Promise<void>;
 }
 
 const XP_TABLE: Record<string, number> = {
@@ -141,6 +146,31 @@ export class DatabaseStorage implements IStorage {
     if (existing.length > 0) return null;
     const [newAchievement] = await db.insert(achievements).values({ key, title, description, icon }).returning();
     return newAchievement;
+  }
+
+  async getPackingItems(listName?: string): Promise<PackingItem[]> {
+    if (listName) {
+      return db.select().from(packingItems).where(eq(packingItems.listName, listName)).orderBy(packingItems.createdAt);
+    }
+    return db.select().from(packingItems).orderBy(packingItems.createdAt);
+  }
+
+  async createPackingItem(item: InsertPackingItem): Promise<PackingItem> {
+    const [newItem] = await db.insert(packingItems).values(item).returning();
+    return newItem;
+  }
+
+  async updatePackingItem(id: number, packed: boolean): Promise<PackingItem | undefined> {
+    const [updated] = await db.update(packingItems).set({ packed }).where(eq(packingItems.id, id)).returning();
+    return updated;
+  }
+
+  async deletePackingItem(id: number): Promise<void> {
+    await db.delete(packingItems).where(eq(packingItems.id, id));
+  }
+
+  async clearPackingList(listName: string): Promise<void> {
+    await db.delete(packingItems).where(eq(packingItems.listName, listName));
   }
 }
 

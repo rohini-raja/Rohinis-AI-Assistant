@@ -14,6 +14,7 @@ import { ShinobiMap } from "@/components/ShinobiMap";
 import { NinjaCalendar } from "@/components/NinjaCalendar";
 import { NinjaXPBar, NinjaQuickStats } from "@/components/NinjaXPBar";
 import { NinjaAchievements } from "@/components/NinjaAchievements";
+import { MissionPrepScroll } from "@/components/MissionPrepScroll";
 import { Link } from "wouter";
 
 export default function Dashboard() {
@@ -124,6 +125,7 @@ export default function Dashboard() {
               <NinjaQuickStats />
               <NinjaAchievements />
               <NinjaTimer />
+              <MissionPrepScroll />
               <NinjaCalendar tasks={tasks || []} />
               <QuickNotes />
               <NinjaMelodies />
