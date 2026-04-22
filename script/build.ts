@@ -65,9 +65,16 @@ async function buildAll() {
 
   console.log("building api handler...");
   await esbuild({
-    ...sharedEsbuildOpts,
     entryPoints: ["api/_handler.ts"],
+    platform: "node",
+    bundle: true,
+    format: "cjs",
     outfile: "api/index.js",
+    define: { "process.env.NODE_ENV": '"production"' },
+    minify: true,
+    logLevel: "info",
+    tsconfig: "tsconfig.json",
+    // Bundle everything — Vercel doesn't deploy node_modules for pre-built files
   });
 }
 
