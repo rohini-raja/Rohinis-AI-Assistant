@@ -8,3 +8,5 @@ local.db-wal
 server/public
 vite.config.ts.*
 *.tar.gz
+.vercel
+api/index.js
