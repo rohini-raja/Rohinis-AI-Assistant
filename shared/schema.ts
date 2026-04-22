@@ -1,10 +1,10 @@
 
-import { sqliteTable, text, integer, blob } from "drizzle-orm/sqlite-core";
+import { pgTable, text, serial, timestamp, boolean, integer } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-export const tasks = sqliteTable("tasks", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const tasks = pgTable("tasks", {
+  id: serial("id").primaryKey(),
   title: text("title").notNull(),
   description: text("description"),
   status: text("status", { enum: ["pending", "completed", "archived"] }).default("pending").notNull(),
@@ -14,16 +14,16 @@ export const tasks = sqliteTable("tasks", {
   team: text("team").default("team7").notNull(),
   happiness: integer("happiness").default(50).notNull(),
   chakra: integer("chakra").default(100).notNull(),
-  isRecurring: integer("is_recurring", { mode: "boolean" }).default(false).notNull(),
+  isRecurring: boolean("is_recurring").default(false).notNull(),
   recurringInterval: text("recurring_interval"),
   estimatedMinutes: integer("estimated_minutes"),
-  lastChakraUpdate: integer("last_chakra_update", { mode: "timestamp" }).$defaultFn(() => new Date()),
-  createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(() => new Date()),
-  completedAt: integer("completed_at", { mode: "timestamp" }),
+  lastChakraUpdate: timestamp("last_chakra_update").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+  completedAt: timestamp("completed_at"),
 });
 
-export const userStats = sqliteTable("user_stats", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const userStats = pgTable("user_stats", {
+  id: serial("id").primaryKey(),
   totalXp: integer("total_xp").default(0).notNull(),
   ninjaRank: text("ninja_rank").default("academy").notNull(),
   currentStreak: integer("current_streak").default(0).notNull(),
@@ -33,40 +33,40 @@ export const userStats = sqliteTable("user_stats", {
   lastActiveDate: text("last_active_date"),
   experience: integer("experience").default(0).notNull(),
   level: text("level").default("genin").notNull(),
-  unlockedVillages: blob("unlocked_villages", { mode: "json" }).$type<string[]>().$defaultFn(() => ["leaf"]).notNull(),
-  updatedAt: integer("updated_at", { mode: "timestamp" }).$defaultFn(() => new Date()),
+  unlockedVillages: text("unlocked_villages").array().default(["leaf"]).notNull(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-export const achievements = sqliteTable("achievements", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const achievements = pgTable("achievements", {
+  id: serial("id").primaryKey(),
   key: text("key").notNull().unique(),
   title: text("title").notNull(),
   description: text("description").notNull(),
   icon: text("icon").notNull(),
-  unlockedAt: integer("unlocked_at", { mode: "timestamp" }).$defaultFn(() => new Date()),
+  unlockedAt: timestamp("unlocked_at").defaultNow(),
 });
 
-export const taskUpdates = sqliteTable("task_updates", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const taskUpdates = pgTable("task_updates", {
+  id: serial("id").primaryKey(),
   taskId: integer("task_id").notNull().references(() => tasks.id, { onDelete: "cascade" }),
   content: text("content").notNull(),
-  createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(() => new Date()),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
-export const quickNotes = sqliteTable("quick_notes", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const quickNotes = pgTable("quick_notes", {
+  id: serial("id").primaryKey(),
   content: text("content").notNull(),
-  completed: integer("completed", { mode: "boolean" }).default(false).notNull(),
-  createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(() => new Date()),
+  completed: boolean("completed").default(false).notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
-export const packingItems = sqliteTable("packing_items", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const packingItems = pgTable("packing_items", {
+  id: serial("id").primaryKey(),
   content: text("content").notNull(),
   category: text("category", { enum: ["weapons", "scrolls", "provisions", "attire", "medical", "tools"] }).default("tools").notNull(),
-  packed: integer("packed", { mode: "boolean" }).default(false).notNull(),
+  packed: boolean("packed").default(false).notNull(),
   listName: text("list_name").default("default").notNull(),
-  createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(() => new Date()),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 export const insertPackingItemSchema = createInsertSchema(packingItems).omit({ id: true, createdAt: true });
