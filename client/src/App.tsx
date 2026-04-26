@@ -9,6 +9,7 @@ import NotFound from "@/pages/not-found";
 import { useEffect, useState } from "react";
 import { SHINOBI_DATA } from "@/hooks/use-tasks";
 import { motion } from "framer-motion";
+import { HandSealAnimation } from "@/components/HandSealAnimation";
 
 function Router() {
   return (
@@ -50,6 +51,7 @@ function App() {
       <TooltipProvider>
         <div className={`min-h-screen font-${font}`}>
           <Toaster />
+          <HandSealAnimation />
           <Router />
           <div className="fixed bottom-4 right-4 z-50 flex flex-col items-end gap-2">
             <button 

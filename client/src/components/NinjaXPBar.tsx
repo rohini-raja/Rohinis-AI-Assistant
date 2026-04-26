@@ -23,6 +23,7 @@ export function NinjaXPBar() {
   if (!stats) return null;
 
   const rank = stats.ninjaRank || "academy";
+  localStorage.setItem("ninja-rank", rank);
   const info = RANK_INFO[rank] || RANK_INFO.academy;
   const currentIdx = RANK_ORDER.indexOf(rank);
   const prevThreshold = currentIdx > 0 ? RANK_INFO[RANK_ORDER[currentIdx - 1]]?.next || 0 : 0;

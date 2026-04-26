@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Input } from "@/components/ui/input";
 import { format, differenceInDays } from "date-fns";
-import { Check, Trash2, ShieldAlert, Shield, ShieldCheck, Crown, Scroll, Send, Heart, HeartOff, Copy, RefreshCw, Clock } from "lucide-react";
+import { Check, Trash2, ShieldAlert, Shield, ShieldCheck, Crown, Scroll, Send, Heart, HeartOff, Copy, RefreshCw, Clock, Eye } from "lucide-react";
 import { useUpdateTask, useDeleteTask, useAddTaskUpdate, useCreateTask, SHINOBI_DATA } from "@/hooks/use-tasks";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -61,6 +61,16 @@ export function TaskCard({ task }: TaskCardProps) {
   const [updateText, setUpdateText] = useState("");
   const [showChakraAnimation, setShowChakraAnimation] = useState(false);
   const [currentHokageId, setCurrentHokageId] = useState(localStorage.getItem("ninja-selected-hokage") || "tsunade");
+  const [snoozed, setSnoozed] = useState(() => {
+    const until = parseInt(localStorage.getItem(`ninja-snoozed-${task.id}`) || "0");
+    return Date.now() < until;
+  });
+
+  const RANK_ORDER_LOCAL = ["academy", "genin", "chunin", "jonin", "anbu", "kage"];
+  const ninjaRank = localStorage.getItem("ninja-rank") || "academy";
+  const rankIdx = RANK_ORDER_LOCAL.indexOf(ninjaRank);
+  const hasJonin = rankIdx >= RANK_ORDER_LOCAL.indexOf("jonin");
+  const hasAnbu = rankIdx >= RANK_ORDER_LOCAL.indexOf("anbu");
 
   useEffect(() => {
     const handleHokageChange = (e: any) => {
@@ -99,8 +109,8 @@ export function TaskCard({ task }: TaskCardProps) {
   };
 
   const daysSinceCreated = task.createdAt ? differenceInDays(new Date(), new Date(task.createdAt)) : 0;
-  const isOverdue = task.status === 'pending' && daysSinceCreated > 3;
-  const isUrgent = task.status === 'pending' && daysSinceCreated > 7;
+  const isOverdue = task.status === 'pending' && daysSinceCreated > 3 && !snoozed;
+  const isUrgent = task.status === 'pending' && daysSinceCreated > 7 && !snoozed;
 
   const handleShadowClone = () => {
     playCloneSound();
@@ -123,15 +133,26 @@ export function TaskCard({ task }: TaskCardProps) {
   const handleToggleStatus = () => {
     const newStatus = task.status === 'pending' ? 'completed' : 'pending';
     const completedAt = newStatus === 'completed' ? new Date().toISOString() : null;
-    
+
     if (newStatus === 'completed') {
       playCompleteSound();
       setShowChakraAnimation(true);
       setTimeout(() => setShowChakraAnimation(false), 2000);
+      window.dispatchEvent(new CustomEvent("task-completed", { detail: { taskId: task.id } }));
     }
-    
+
     // @ts-ignore
     updateTask.mutate({ id: task.id, status: newStatus, completedAt });
+  };
+
+  const handleSubstitution = () => {
+    const until = Date.now() + 24 * 60 * 60 * 1000;
+    localStorage.setItem(`ninja-snoozed-${task.id}`, until.toString());
+    setSnoozed(true);
+  };
+
+  const handleSharinganFocus = () => {
+    window.dispatchEvent(new CustomEvent("sharingan-focus", { detail: { taskId: task.id } }));
   };
 
   const handleAddUpdate = (e: React.FormEvent) => {
@@ -283,7 +304,31 @@ export function TaskCard({ task }: TaskCardProps) {
             </h3>
           </div>
           
-          <div className="flex gap-2 relative z-20">
+          <div className="flex gap-2 relative z-20 flex-wrap justify-end">
+            {hasAnbu && (
+              <Button
+                size="icon"
+                variant="ghost"
+                title="Sharingan Focus (ANBU)"
+                className="rounded-xl h-10 w-10 border bg-neutral-800/50 border-neutral-700/50 hover:border-red-500/50 hover:text-red-400 transition-all"
+                onClick={handleSharinganFocus}
+                data-testid={`sharingan-task-${task.id}`}
+              >
+                <Eye className="h-4 w-4" />
+              </Button>
+            )}
+            {hasJonin && isOverdue && (
+              <Button
+                size="icon"
+                variant="ghost"
+                title="Substitution Jutsu — Snooze 24h (Jonin)"
+                className="rounded-xl h-10 w-10 border bg-neutral-800/50 border-neutral-700/50 hover:border-purple-500/50 hover:text-purple-400 transition-all"
+                onClick={handleSubstitution}
+                data-testid={`snooze-task-${task.id}`}
+              >
+                <span className="text-sm leading-none">🪵</span>
+              </Button>
+            )}
             <Button
               size="icon"
               variant="ghost"

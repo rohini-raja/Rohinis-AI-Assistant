@@ -1,6 +1,5 @@
 import { useTasks, exportData, useImportData, SHINOBI_DATA } from "@/hooks/use-tasks";
 import { CreateTaskDialog } from "@/components/CreateTaskDialog";
-import { TaskCard } from "@/components/TaskCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -15,6 +14,9 @@ import { NinjaCalendar } from "@/components/NinjaCalendar";
 import { NinjaXPBar, NinjaQuickStats } from "@/components/NinjaXPBar";
 import { NinjaAchievements } from "@/components/NinjaAchievements";
 import { MissionPrepScroll } from "@/components/MissionPrepScroll";
+import { NinjaJutsu } from "@/components/NinjaJutsu";
+import { BingoBook } from "@/components/BingoBook";
+import { TaskCard } from "@/components/TaskCard";
 import { Link } from "wouter";
 
 export default function Dashboard() {
@@ -26,6 +28,15 @@ export default function Dashboard() {
   const [showTools, setShowTools] = useState(false);
   const [mapVillageFilter, setMapVillageFilter] = useState<string | null>(null);
   const [showMap, setShowMap] = useState(false);
+  const [sharinganFocusId, setSharinganFocusId] = useState<number | null>(null);
+
+  useEffect(() => {
+    const handle = (e: Event) => {
+      setSharinganFocusId((e as CustomEvent).detail.taskId);
+    };
+    window.addEventListener("sharingan-focus", handle);
+    return () => window.removeEventListener("sharingan-focus", handle);
+  }, []);
 
   useEffect(() => {
     if (!tasks) return;
@@ -123,6 +134,8 @@ export default function Dashboard() {
           >
             <div className="space-y-6 pb-10">
               <NinjaQuickStats />
+              <NinjaJutsu />
+              <BingoBook tasks={tasks || []} />
               <NinjaAchievements />
               <NinjaTimer />
               <MissionPrepScroll />
@@ -304,6 +317,58 @@ export default function Dashboard() {
           )}
         </main>
       </div>
+
+      <AnimatePresence>
+        {sharinganFocusId !== null && (() => {
+          const focusTask = tasks?.find(t => t.id === sharinganFocusId);
+          if (!focusTask) return null;
+          return (
+            <motion.div
+              key="sharingan-overlay"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[90] bg-black/85 backdrop-blur-md flex items-center justify-center p-6"
+              onClick={() => setSharinganFocusId(null)}
+            >
+              <motion.div
+                initial={{ scale: 0.85, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.85, opacity: 0 }}
+                transition={{ type: "spring", stiffness: 260, damping: 22 }}
+                className="max-w-lg w-full relative"
+                onClick={e => e.stopPropagation()}
+              >
+                {[0, 1, 2].map(i => (
+                  <motion.div
+                    key={i}
+                    className="absolute rounded-full border border-red-500/15 pointer-events-none"
+                    style={{ inset: `-${(i + 1) * 22}px` }}
+                    animate={{ scale: [1, 1.04, 1], opacity: [0.4, 0.7, 0.4] }}
+                    transition={{ duration: 2.5 + i * 0.5, repeat: Infinity }}
+                  />
+                ))}
+                <div className="relative z-10 rounded-2xl overflow-hidden border-2 border-red-500/40 shadow-[0_0_70px_rgba(220,30,30,0.35)] bg-neutral-950">
+                  <div className="bg-red-950/50 px-4 py-2 flex items-center justify-between border-b border-red-900/40">
+                    <span className="text-[10px] font-mono text-red-400 uppercase tracking-widest flex items-center gap-2">
+                      <span>👁️</span> SHARINGAN FOCUS ACTIVE
+                    </span>
+                    <button
+                      onClick={() => setSharinganFocusId(null)}
+                      className="text-neutral-500 hover:text-white transition-colors text-base leading-none"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                  <div className="p-2">
+                    <TaskCard task={focusTask} />
+                  </div>
+                </div>
+              </motion.div>
+            </motion.div>
+          );
+        })()}
+      </AnimatePresence>
     </div>
   );
 }
